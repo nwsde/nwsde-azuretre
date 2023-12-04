@@ -4,11 +4,12 @@ name: Deploy Azure TRE
 # It also runs on a schedule, serving as the nightly build
 
 on:  # yamllint disable-line rule:truthy
-  schedule:
-    # midnight every day https://crontab.guru/#0_0_*_*_*
-    - cron: "0 0 * * *"
-  push:
-    branches: [main]
+# JR 29-11-2023  Disable push to repo and scheduled deployments (for now) 
+#  schedule:
+#    # midnight every day https://crontab.guru/#0_0_*_*_*
+#    - cron: "0 0 * * *"
+#  push:
+#    branches: [main]
   workflow_dispatch:
     inputs:
       environment:
@@ -23,8 +24,9 @@ concurrency: "${{ github.workflow }}-${{ github.ref }}"
 
 jobs:
   run-deploy-tre-main:
-    name: "Deploy main"
-    if: github.ref == 'refs/heads/main'
+    name: "Deploy"
+# JR 29-11-2023  Disable main branch check - this is now controlled via GitHub environment protection rules (see Settings > Environments) 
+#    if: github.ref == 'refs/heads/main'
     uses: ./.github/workflows/deploy_tre_reusable.yml
     with:
       ciGitRef: ${{ github.ref }}
