@@ -20,7 +20,9 @@ jq --arg rootClientId "${SWAGGER_UI_CLIENT_ID}" \
   --arg treId "${TRE_ID}" \
   --arg version "${ui_version}" \
   --arg activeDirectoryUri "${activeDirectoryUri}" \
-  '.rootClientId = $rootClientId | .rootTenantId = $rootTenantId | .treApplicationId = $treApplicationId | .treUrl = $treUrl | .treId = $treId | .version = $version | .activeDirectoryUri = $activeDirectoryUri' ./src/config.source.json > ./src/config.json
+  --arg treProductName "${TRE_PRODUCT_NAME}" \
+  --arg treFooterText "${TRE_FOOTER_TEXT}" \
+  '.rootClientId = $rootClientId | .rootTenantId = $rootTenantId | .treApplicationId = $treApplicationId | .treUrl = $treUrl | .treId = $treId | .version = $version | .activeDirectoryUri = $activeDirectoryUri | .treProductName = $treProductName | .treFooterText = $treFooterText' ./src/config.source.json > ./src/config.json
 
 # build and deploy the app
 yarn install
