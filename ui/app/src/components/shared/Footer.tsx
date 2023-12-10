@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { AnimationClassNames, Callout, IconButton, FontWeights, Stack, Text, getTheme, mergeStyles, mergeStyleSets, StackItem, IButtonStyles } from '@fluentui/react';
+import { AnimationClassNames, Callout, IconButton, FontWeights, Stack, Text, getTheme, mergeStyles, mergeStyleSets, StackItem, IButtonStyles, Link } from '@fluentui/react';
 import { HttpMethod, useAuthApiCall } from '../../hooks/useAuthApiCall';
 import { ApiEndpoint } from '../../models/apiEndpoints';
 import config from "../../config.json";
@@ -66,7 +66,7 @@ export const Footer: React.FunctionComponent = () => {
             {
               uiConfig.gitRef && <Stack horizontal horizontalAlign='space-between'>
                 <Stack.Item>Git Ref:</Stack.Item>
-                <Stack.Item>{uiConfig.gitRef}</Stack.Item>
+                <Stack.Item><a href={`https://www.github.com/${uiConfig.gitRepo}/tree/${uiConfig.gitRef}`} target="_blank" rel='noreferrer'>{uiConfig.gitRef}</a></Stack.Item>
               </Stack>
             }
             {
