@@ -57,6 +57,32 @@ export const Footer: React.FunctionComponent = () => {
             Azure TRE
           </Text>
           <Stack tokens={{childrenGap: 5}}>
+          {
+              uiConfig.gitRepo && <Stack horizontal horizontalAlign='space-between'>
+                <Stack.Item>Git Repo:</Stack.Item>
+                <Stack.Item>{uiConfig.gitRepo}</Stack.Item>
+              </Stack>
+            }
+            {
+              uiConfig.gitRef && <Stack horizontal horizontalAlign='space-between'>
+                <Stack.Item>Git Ref:</Stack.Item>
+                <Stack.Item>{uiConfig.gitRef}</Stack.Item>
+              </Stack>
+            }
+            {
+              uiConfig.gitHash && <Stack horizontal horizontalAlign='space-between'>
+                <Stack.Item>Git Hash:</Stack.Item>
+                <Stack.Item>{uiConfig.gitHash}</Stack.Item>
+              </Stack>
+            }
+            {
+              uiConfig.deployTime && <Stack horizontal horizontalAlign='space-between'>
+                <Stack.Item>Deploy Time:</Stack.Item>
+                <Stack.Item>{uiConfig.deployTime}</Stack.Item>
+              </Stack>
+            }
+          </Stack>
+          <Stack tokens={{childrenGap: 5}} style={{marginTop: 10, paddingTop: 8, borderTop: '1px solid #e8e8e8'}}>
             {
               uiConfig.version && <Stack horizontal horizontalAlign='space-between'>
                 <Stack.Item>UI Version:</Stack.Item>
@@ -109,7 +135,7 @@ const iconButtonStyles: Partial<IButtonStyles> = {
 
 const styles = mergeStyleSets({
   callout: {
-    width: 250,
+    width: 300,
     padding: '20px 24px',
   },
   title: {

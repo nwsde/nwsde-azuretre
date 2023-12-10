@@ -12,6 +12,11 @@ ui_version=$(jq -r '.version' package.json)
 
 activeDirectoryUri="$(az cloud show --query endpoints.activeDirectory --output tsv)"
 
+gitRef="$(git branch --show-current)"
+gitHash="$(git rev-parse --short HEAD)"
+gitRepo="$(git config --get remote.origin.url | sed 's/.*\/\([^ ]*\/[^.]*\).*/\1/')"
+deployTime="$(printf '%(%d-%b-%Y %H:%M)T')"
+
 # replace the values in the config file
 jq --arg rootClientId "${SWAGGER_UI_CLIENT_ID}" \
   --arg rootTenantId "${AAD_TENANT_ID}" \
@@ -20,7 +25,11 @@ jq --arg rootClientId "${SWAGGER_UI_CLIENT_ID}" \
   --arg treId "${TRE_ID}" \
   --arg version "${ui_version}" \
   --arg activeDirectoryUri "${activeDirectoryUri}" \
-  '.rootClientId = $rootClientId | .rootTenantId = $rootTenantId | .treApplicationId = $treApplicationId | .treUrl = $treUrl | .treId = $treId | .version = $version | .activeDirectoryUri = $activeDirectoryUri' ./src/config.source.json > ./src/config.json
+  --arg gitRef "${gitRef}" \
+  --arg gitHash "${gitHash}" \
+  --arg gitRepo "${gitRepo}" \
+  --arg deployTime "${deployTime}" \
+  '.rootClientId = $rootClientId | .rootTenantId = $rootTenantId | .treApplicationId = $treApplicationId | .treUrl = $treUrl | .treId = $treId | .version = $version | .activeDirectoryUri = $activeDirectoryUri | .gitRef = $gitRef | .gitHash = $gitHash | .gitRepo = $gitRepo | .deployTime = $deployTime' ./src/config.source.json > ./src/config.json
 
 # build and deploy the app
 yarn install
