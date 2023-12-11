@@ -32,7 +32,7 @@ export const Footer: React.FunctionComponent = () => {
   return (
     <div className={contentClass}>
       <Stack horizontal style={{alignItems:'center'}}>
-        <StackItem grow={1}>Azure Trusted Research Environment</StackItem>
+        <StackItem grow={1}>North West Secure Data Environment - Part of NHS Research Secure Data Environment Network</StackItem>
         <StackItem>
           <IconButton
             styles={iconButtonStyles}
