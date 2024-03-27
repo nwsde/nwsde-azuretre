@@ -1,7 +1,7 @@
 ---
 schemaVersion: 1.0.0
 name: tre-workspace-research
-version: 1.5.4
+version: 1.5.9
 description: "A NWSDE research TRE workspace"
 dockerfile: Dockerfile.tmpl
 registry: azuretre
@@ -114,6 +114,8 @@ parameters:
   - name: enable_airlock
     type: boolean
     default: true
+  - name: research_project_id
+    type: string
   - name: arm_environment
     type: string
 
@@ -182,6 +184,7 @@ install:
         aad_redirect_uris_b64: ${ bundle.parameters.aad_redirect_uris }
         app_service_plan_sku: ${ bundle.parameters.app_service_plan_sku }
         enable_airlock: ${ bundle.parameters.enable_airlock }
+        research_project_id: ${ bundle.parameters.research_project_id }
         arm_environment: ${ bundle.parameters.arm_environment }
       backendConfig:
         resource_group_name: ${ bundle.parameters.tfstate_resource_group_name }
@@ -222,6 +225,7 @@ upgrade:
         aad_redirect_uris_b64: ${ bundle.parameters.aad_redirect_uris }
         app_service_plan_sku: ${ bundle.parameters.app_service_plan_sku }
         enable_airlock: ${ bundle.parameters.enable_airlock }
+        research_project_id: ${ bundle.parameters.research_project_id }
         arm_environment: ${ bundle.parameters.arm_environment }
       backendConfig:
         resource_group_name: ${ bundle.parameters.tfstate_resource_group_name }
@@ -285,6 +289,7 @@ uninstall:
         aad_redirect_uris_b64: ${ bundle.parameters.aad_redirect_uris }
         app_service_plan_sku: ${ bundle.parameters.app_service_plan_sku }
         enable_airlock: ${ bundle.parameters.enable_airlock }
+        research_project_id: ${ bundle.parameters.research_project_id }
         arm_environment: ${ bundle.parameters.arm_environment }
       backendConfig:
         resource_group_name: ${ bundle.parameters.tfstate_resource_group_name }

@@ -137,6 +137,12 @@
       }
     },
     {
+      "name": "research_project_id",
+      "source": {
+        "env": "RESEARCH_PROJECT_ID"
+      }
+    },
+    {
       "name": "arm_environment",
       "source": {
         "env": "ARM_ENVIRONMENT"

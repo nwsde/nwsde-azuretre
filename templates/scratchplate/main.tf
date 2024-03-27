@@ -95,7 +95,6 @@ data "azurerm_data_factory" "lakehouse-adf" {
 #   }
 # }
 
-
 # DO IN LAKEHOUSE WORKSPACE
 resource "azurerm_storage_account" "nwsdestoragea" {
   name                     = "nwsdestoragea"
@@ -115,9 +114,12 @@ resource "azurerm_storage_container" "nwsde-con-a" {
 resource "azurerm_data_factory_linked_service_azure_blob_storage" "nwsde-lakehouse-storage-ls" {
   name              = "nwsde-lakehouse-storage-ls"
   data_factory_id   =  data.azurerm_data_factory.lakehouse-adf.id #azurerm_data_factory.adf.id
-  connection_string = azurerm_storage_account.nwsdestoragea.primary_connection_string
+  #connection_string = azurerm_storage_account.nwsdestoragea.primary_connection_string
   depends_on = [azurerm_storage_account.nwsdestoragea, data.azurerm_data_factory.lakehouse-adf, azurerm_data_factory_integration_runtime_azure.ir_test ]
   integration_runtime_name = "ir-adf-test"
+  use_managed_identity = true
+  service_endpoint = azurerm_storage_account.nwsdestoragea.primary_blob_endpoint
+  storage_kind = "StorageV2"
 }
 
 # Dont need this in prod
@@ -234,7 +236,6 @@ resource "azurerm_data_factory_trigger_blob_event" "ws_pipeline_trigger" {
   }
 }
 
-
 resource "azurerm_data_factory_integration_runtime_azure" "ir_test" {
   name            = "ir-adf-test"
   data_factory_id = data.azurerm_data_factory.lakehouse-adf.id
@@ -251,8 +252,51 @@ resource "azurerm_data_factory_managed_private_endpoint" "storeape" {
   subresource_name   = "blob"
 }
 
+resource "azurerm_role_assignment" "blob-contributor-role" {
+  scope                 = azurerm_storage_account.nwsdestoragea.id
+  role_definition_name  = "Storage Blob Data Contributor"
+  principal_id          = data.azurerm_data_factory.lakehouse-adf.identity[0].principal_id
+  depends_on = [ data.azurerm_data_factory.lakehouse-adf, azurerm_storage_account.nwsdestoragea ]
+}
 
 
 
+data "azapi_resource" "batch_storage_account_private_endpoint_connection" {
+  type                   = "Microsoft.Storage/storageAccounts@2022-09-01"
+  resource_id            = azurerm_storage_account.nwsdestoragea.id
+  response_export_values = ["properties.privateEndpointConnections."]
 
+  depends_on = [
+    azurerm_data_factory_managed_private_endpoint.storeape
+  ]
+}
 
+locals {
+
+  storage_account_blob_private_endpoint_connection_name = one([
+    for connection in jsondecode(data.azapi_resource.batch_storage_account_private_endpoint_connection.output).properties.privateEndpointConnections
+    : connection.name
+    if
+    endswith(connection.properties.privateLinkServiceConnectionState.description, azurerm_data_factory_managed_private_endpoint.storeape.name)
+  ])
+
+}
+
+resource "azapi_update_resource" "approve_batch_storage_account_blob_private_endpoint_connection" {
+  type      = "Microsoft.Storage/storageAccounts/privateEndpointConnections@2022-09-01"
+  name      = local.storage_account_blob_private_endpoint_connection_name
+  parent_id = azurerm_storage_account.nwsdestoragea.id
+
+  body = jsonencode({
+    properties = {
+      privateLinkServiceConnectionState = {
+        description = "Approved via NWSDE workspace - ${azurerm_data_factory_managed_private_endpoint.storeape.name}"
+        status      = "Approved"
+      }
+    }
+  })
+
+  lifecycle {
+    ignore_changes = all # We don't want to touch this after creation
+  }
+}

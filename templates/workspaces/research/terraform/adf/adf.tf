@@ -1,43 +1,87 @@
-resource "azurerm_data_factory_linked_service_azure_blob_storage" "nwsde-lakehouse-storage-ls" {
-  name              = format("%s-lakehouse-ws-storage-ls", var.tre_id)
-  data_factory_id   = data.azurerm_data_factory.lakehouse-adf.id
-  connection_string = data.azurerm_storage_account.lakehouse-sa.primary_connection_string  #azurerm_storage_account.nwsdestoragea.primary_connection_string
-  depends_on = [data.azurerm_storage_account.lakehouse-sa, data.azurerm_data_factory.lakehouse-adf]
+############ ADF Research WS Storage Permissions ############
+
+resource "azurerm_role_assignment" "adf-research-blob-contributor-role" {
+  scope                 = data.azurerm_storage_account.ws-sa.id
+  role_definition_name  = "Storage Blob Data Contributor"
+  principal_id          = data.azurerm_data_factory.lakehouse-adf.identity[0].principal_id
+  depends_on = [ data.azurerm_data_factory.lakehouse-adf, data.azurerm_storage_account.ws-sa ]
 }
 
-# Dont need this in prod
-# resource "azurerm_storage_account" "nwsdestorageb" {
-#   name                     = "nwsdestorageb"
-#   resource_group_name      = azurerm_resource_group.rg-mph-scratchplate.name
-#   location                 = azurerm_resource_group.rg-mph-scratchplate.location
-#   account_tier             = "Standard"
-#   account_replication_type = "GRS"
-#   is_hns_enabled           = true
-#   depends_on = [azurerm_resource_group.rg-mph-scratchplate]
-# }
+############ Research WS ADF Private Endpoint ############
+
+resource "azurerm_data_factory_managed_private_endpoint" "ws-store-pe" {
+  name               = format("%s-ws-pe", var.short_workspace_id)
+  data_factory_id    = data.azurerm_data_factory.lakehouse-adf.id
+  target_resource_id = data.azurerm_storage_account.ws-sa.id
+  subresource_name   = "blob"
+  depends_on = [ data.azurerm_storage_account.ws-sa ]
+}
+
+data "azapi_resource" "batch_storage_account_private_endpoint_connection" {
+  type                   = "Microsoft.Storage/storageAccounts@2022-09-01"
+  resource_id            = data.azurerm_storage_account.ws-sa.id
+  response_export_values = ["properties.privateEndpointConnections."]
+
+  depends_on = [
+    azurerm_data_factory_managed_private_endpoint.ws-store-pe
+  ]
+}
+
+locals {
+
+  storage_account_blob_private_endpoint_connection_name = one([
+    for connection in jsondecode(data.azapi_resource.batch_storage_account_private_endpoint_connection.output).properties.privateEndpointConnections
+    : connection.name
+    if
+    endswith(connection.properties.privateLinkServiceConnectionState.description, azurerm_data_factory_managed_private_endpoint.ws-store-pe.name)
+  ])
+
+}
+
+resource "azapi_update_resource" "approve_batch_storage_account_blob_private_endpoint_connection" {
+  type      = "Microsoft.Storage/storageAccounts/privateEndpointConnections@2022-09-01"
+  name      = local.storage_account_blob_private_endpoint_connection_name
+  parent_id = data.azurerm_storage_account.ws-sa.id
+
+  body = jsonencode({
+    properties = {
+      privateLinkServiceConnectionState = {
+        description = "Approved via NWSDE workspace - ${azurerm_data_factory_managed_private_endpoint.ws-store-pe.name}"
+        status      = "Approved"
+      }
+    }
+  })
+
+  lifecycle {
+    ignore_changes = all # We don't want to touch this after creation
+  }
+}
+
 
 
 
 resource "azurerm_data_factory_linked_service_azure_blob_storage" "ws-storage-linked-service" {
   name              = format("%s_storage_ls", var.short_workspace_id)
   data_factory_id   = data.azurerm_data_factory.lakehouse-adf.id
-  connection_string = data.azurerm_storage_account.ws-sa.primary_connection_string
-  depends_on        = [data.azurerm_storage_account.ws-sa, data.azurerm_data_factory.lakehouse-adf]
+  depends_on        = [data.azurerm_storage_account.ws-sa, data.azurerm_data_factory.lakehouse-adf , azurerm_data_factory_managed_private_endpoint.ws-store-pe  ]
+  integration_runtime_name = local.adf_integration_runtime_name
+  use_managed_identity = true
+  service_endpoint = data.azurerm_storage_account.ws-sa.primary_blob_endpoint
+  storage_kind = "StorageV2"
 }
 
 resource "azurerm_data_factory_dataset_azure_blob" "nwsde_dataset_a" {
   name                = format("%s_source_ds", var.short_workspace_id)
   data_factory_id     = data.azurerm_data_factory.lakehouse-adf.id
-  linked_service_name = azurerm_data_factory_linked_service_azure_blob_storage.nwsde-lakehouse-storage-ls.name
-  path                = format("/goldplus/%s", var.short_workspace_id)
-
+  linked_service_name = local.adf_lakehouse_storage_ls_name
+  path                = format("/goldplus/%s", var.research_project_id)
 }
 
 resource "azurerm_data_factory_dataset_azure_blob" "nwsde_dataset_b" {
   name                = format("%s_sink_ds", var.short_workspace_id)
   data_factory_id     = data.azurerm_data_factory.lakehouse-adf.id
   linked_service_name = azurerm_data_factory_linked_service_azure_blob_storage.ws-storage-linked-service.name
-  path                = var.short_workspace_id
+  path                = var.research_project_id
 }
 
 resource "azurerm_data_factory_pipeline" "ws_pipeline" {
@@ -79,7 +123,7 @@ resource "azurerm_data_factory_pipeline" "ws_pipeline" {
                 "referenceName": "${var.short_workspace_id}_source_ds",
                 "type": "DatasetReference",
                 "parameters": {
-                    "FolderPath": "goldplus/${var.short_workspace_id}"
+                    "FolderPath": "goldplus/${var.research_project_id}"
                 }
             }
         ],
@@ -88,7 +132,7 @@ resource "azurerm_data_factory_pipeline" "ws_pipeline" {
                 "referenceName": "${var.short_workspace_id}_sink_ds",
                 "type": "DatasetReference",
                 "parameters": {
-                     "FolderPath": "${var.short_workspace_id}"
+                     "FolderPath": "${var.research_project_id}"
                 }
             }
         ]
@@ -102,7 +146,7 @@ resource "azurerm_data_factory_trigger_blob_event" "ws_pipeline_trigger" {
   storage_account_id  = data.azurerm_storage_account.lakehouse-sa.id
   events              = ["Microsoft.Storage.BlobCreated", "Microsoft.Storage.BlobDeleted"]
   blob_path_ends_with = ".zip"
-  blob_path_begins_with = format("/goldplus/blobs/%s/", var.short_workspace_id)
+  blob_path_begins_with = format("/goldplus/blobs/%s/", var.research_project_id)
   ignore_empty_blobs  = true
   activated           = true
   depends_on = [ azurerm_data_factory_pipeline.ws_pipeline ]
@@ -115,3 +159,13 @@ resource "azurerm_data_factory_trigger_blob_event" "ws_pipeline_trigger" {
     }
   }
 }
+
+
+
+
+
+
+
+
+
+

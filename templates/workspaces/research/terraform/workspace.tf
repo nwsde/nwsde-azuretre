@@ -35,6 +35,7 @@ module "adf" {
   ws_resource_group_name      = azurerm_resource_group.ws.name
   short_workspace_id          = local.short_workspace_id
   tre_resource_id             = var.tre_resource_id
+  research_project_id         = var.research_project_id
 
   depends_on = [ azurerm_storage_account.stg]
 

@@ -22,3 +22,7 @@ variable "ws_id" {
 variable "short_workspace_id" {
   type = string
 }
+
+variable "research_project_id" {
+  type = string
+}
