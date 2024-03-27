@@ -6,10 +6,16 @@
   "description": "This workspace template is the foundation for TRE workspaces.",
   "required": [
     "auth_type",
-    "address_space_size"
+    "address_space_size",
+    "research_project_id"
   ],
   "authorizedRoles": [],
   "properties": {
+    "research_project_id": {
+      "type": "string",
+      "title": "Research Project ID",
+      "description": "The research project id is the identifier associated with a research data request which this TRE workspace will serve"
+    },
     "shared_storage_quota": {
       "type": "integer",
       "title": "Shared Storage Quota",
@@ -283,6 +289,7 @@
       "display_name",
       "description",
       "overview",
+      "research_project_id",
       "shared_storage_quota",
       "app_service_plan_sku",
       "address_space_size",

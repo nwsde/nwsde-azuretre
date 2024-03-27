@@ -58,6 +58,11 @@ variable "enable_airlock" {
   description = "Controls the deployment of Airlock resources in the workspace."
 }
 
+variable "research_project_id" {
+  type        = string
+  description = "Research project identifier associated with the research data request that this TRE workspace will serve"
+}
+
 variable "aad_redirect_uris_b64" {
   type    = string # B64 encoded list of objects like [{"name": "my uri 1", "value": "https://..."}, {}]
   default = "W10=" #b64 for []

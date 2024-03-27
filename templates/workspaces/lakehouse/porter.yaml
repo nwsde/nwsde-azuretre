@@ -1,7 +1,7 @@
 ---
 schemaVersion: 1.0.0
 name: tre-workspace-lakehouse
-version: 1.5.6
+version: 1.5.9
 description: "A Lakehouse workspace for NWSDE data engineers"
 dockerfile: Dockerfile.tmpl
 registry: azuretre

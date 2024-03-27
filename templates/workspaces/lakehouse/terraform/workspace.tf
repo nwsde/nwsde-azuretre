@@ -69,9 +69,11 @@ module "adf" {
   enable_local_debugging      = var.enable_local_debugging
   short_workspace_id          = local.short_workspace_id
   arm_environment             = var.arm_environment
+  ws_resource_group_name      = azurerm_resource_group.ws.name
    depends_on = [
     module.network
   ]
+
 }
 
 module "azure_monitor" {

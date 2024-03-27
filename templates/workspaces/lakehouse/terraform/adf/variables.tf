@@ -14,3 +14,7 @@ variable "short_workspace_id" {
 variable "arm_environment" {
   type = string
 }
+
+variable "ws_resource_group_name" {
+  type = string
+}
