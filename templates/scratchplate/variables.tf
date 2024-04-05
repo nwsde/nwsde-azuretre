@@ -1,7 +1,7 @@
 variable "ws_id" {
   type        = string
   description = "Dummy research workspace name"
-  default = "ws-e7f6"
+  default = "ws-AAAA"
 }
 
 variable "tre_id" {

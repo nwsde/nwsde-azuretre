@@ -112,11 +112,11 @@ resource "azurerm_storage_container" "nwsde-con-a" {
 }
 
 resource "azurerm_data_factory_linked_service_azure_blob_storage" "nwsde-lakehouse-storage-ls" {
-  name              = "nwsde-lakehouse-storage-ls"
+  name              = "test-lakehouse-storage-ls"
   data_factory_id   =  data.azurerm_data_factory.lakehouse-adf.id #azurerm_data_factory.adf.id
   #connection_string = azurerm_storage_account.nwsdestoragea.primary_connection_string
-  depends_on = [azurerm_storage_account.nwsdestoragea, data.azurerm_data_factory.lakehouse-adf, azurerm_data_factory_integration_runtime_azure.ir_test ]
-  integration_runtime_name = "ir-adf-test"
+  depends_on = [azurerm_storage_account.nwsdestoragea, data.azurerm_data_factory.lakehouse-adf ]
+  integration_runtime_name = "nwsde-ir"
   use_managed_identity = true
   service_endpoint = azurerm_storage_account.nwsdestoragea.primary_blob_endpoint
   storage_kind = "StorageV2"
@@ -133,18 +133,32 @@ resource "azurerm_storage_account" "nwsdestorageb" {
   depends_on = [azurerm_resource_group.rg-mph-scratchplate]
 }
 
-resource "azurerm_storage_container" "nwsde-con-b" {
-  name                  = var.ws_id
-  storage_account_name  = azurerm_storage_account.nwsdestorageb.name
+resource "azurerm_storage_share" "shared_storage" {
+  name                 = "vm-shared-storage"
+  storage_account_name = azurerm_storage_account.nwsdestorageb.name
+  quota                = 1
+
+  //depends_on = [
+    //azurerm_private_endpoint.stgfilepe,
+    //azurerm_storage_account_network_rules.stgrules
+  //]
 }
 
-
-resource "azurerm_data_factory_linked_service_azure_blob_storage" "ws-storage-linked-service" {
-  name              = format("%s_storage_ls", var.ws_id)
-  data_factory_id   = data.azurerm_data_factory.lakehouse-adf.id #azurerm_data_factory.adf.id
+resource "azurerm_data_factory_linked_service_azure_file_storage" "fileshare" {
+  name              = "test-fileshare-ls"
+  data_factory_id   = data.azurerm_data_factory.lakehouse-adf.id
+  depends_on = [azurerm_storage_account.nwsdestorageb, data.azurerm_data_factory.lakehouse-adf]
+  integration_runtime_name = "nwsde-ir"
   connection_string = azurerm_storage_account.nwsdestorageb.primary_connection_string
-  depends_on        = [azurerm_storage_account.nwsdestorageb, data.azurerm_data_factory.lakehouse-adf] #azurerm_data_factory.adf
+  file_share = azurerm_storage_share.shared_storage.name
 }
+
+//resource "azurerm_data_factory_linked_service_azure_blob_storage" "ws-storage-linked-service" {
+//  name              = format("%s_storage_ls", var.ws_id)
+//  data_factory_id   = data.azurerm_data_factory.lakehouse-adf.id #azurerm_data_factory.adf.id
+//  connection_string = azurerm_storage_account.nwsdestorageb.primary_connection_string
+//  depends_on        = [azurerm_storage_account.nwsdestorageb, data.azurerm_data_factory.lakehouse-adf] #azurerm_data_factory.adf
+//}
 
 resource "azurerm_data_factory_dataset_azure_blob" "nwsde_dataset_a" {
   name                = format("%s_source_ds", var.ws_id)
@@ -157,8 +171,8 @@ resource "azurerm_data_factory_dataset_azure_blob" "nwsde_dataset_a" {
 resource "azurerm_data_factory_dataset_azure_blob" "nwsde_dataset_b" {
   name                = format("%s_sink_ds", var.ws_id)
   data_factory_id     = data.azurerm_data_factory.lakehouse-adf.id #CHANGE
-  linked_service_name = azurerm_data_factory_linked_service_azure_blob_storage.ws-storage-linked-service.name
-  path                = var.ws_id
+  linked_service_name = azurerm_data_factory_linked_service_azure_file_storage.fileshare.name
+  path                = format("%s", var.ws_id)
 }
 
 resource "azurerm_data_factory_pipeline" "ws_pipeline" {
@@ -188,7 +202,7 @@ resource "azurerm_data_factory_pipeline" "ws_pipeline" {
                 }
             },
             "sink": {
-                "type": "BlobSink",
+                "type": "FileSystemSink",
                 "storeSettings": {
                     "type": "AzureBlobStorageReadSettings"
                 }
@@ -236,13 +250,13 @@ resource "azurerm_data_factory_trigger_blob_event" "ws_pipeline_trigger" {
   }
 }
 
-resource "azurerm_data_factory_integration_runtime_azure" "ir_test" {
-  name            = "ir-adf-test"
-  data_factory_id = data.azurerm_data_factory.lakehouse-adf.id
-  location        = "AutoResolve"
-  depends_on = [ data.azurerm_data_factory.lakehouse-adf ]
-  virtual_network_enabled = true
-}
+# resource "azurerm_data_factory_integration_runtime_azure" "ir_test" {
+#   name            = "ir-adf-test"
+#   data_factory_id = data.azurerm_data_factory.lakehouse-adf.id
+#   location        = "AutoResolve"
+#   depends_on = [ data.azurerm_data_factory.lakehouse-adf ]
+#   virtual_network_enabled = true
+# }
 
 
 resource "azurerm_data_factory_managed_private_endpoint" "storeape" {
@@ -251,6 +265,14 @@ resource "azurerm_data_factory_managed_private_endpoint" "storeape" {
   target_resource_id = azurerm_storage_account.nwsdestoragea.id
   subresource_name   = "blob"
 }
+
+resource "azurerm_data_factory_managed_private_endpoint" "file_pe" {
+  name               = "file-sa-pe"
+  data_factory_id    = data.azurerm_data_factory.lakehouse-adf.id
+  target_resource_id = azurerm_storage_account.nwsdestorageb.id
+  subresource_name   = "file"
+}
+
 
 resource "azurerm_role_assignment" "blob-contributor-role" {
   scope                 = azurerm_storage_account.nwsdestoragea.id
@@ -261,42 +283,42 @@ resource "azurerm_role_assignment" "blob-contributor-role" {
 
 
 
-data "azapi_resource" "batch_storage_account_private_endpoint_connection" {
-  type                   = "Microsoft.Storage/storageAccounts@2022-09-01"
-  resource_id            = azurerm_storage_account.nwsdestoragea.id
-  response_export_values = ["properties.privateEndpointConnections."]
+# data "azapi_resource" "batch_storage_account_private_endpoint_connection" {
+#   type                   = "Microsoft.Storage/storageAccounts@2022-09-01"
+#   resource_id            = azurerm_storage_account.nwsdestoragea.id
+#   response_export_values = ["properties.privateEndpointConnections."]
 
-  depends_on = [
-    azurerm_data_factory_managed_private_endpoint.storeape
-  ]
-}
+#   depends_on = [
+#     azurerm_data_factory_managed_private_endpoint.storeape
+#   ]
+# }
 
-locals {
+# locals {
 
-  storage_account_blob_private_endpoint_connection_name = one([
-    for connection in jsondecode(data.azapi_resource.batch_storage_account_private_endpoint_connection.output).properties.privateEndpointConnections
-    : connection.name
-    if
-    endswith(connection.properties.privateLinkServiceConnectionState.description, azurerm_data_factory_managed_private_endpoint.storeape.name)
-  ])
+#   storage_account_blob_private_endpoint_connection_name = one([
+#     for connection in jsondecode(data.azapi_resource.batch_storage_account_private_endpoint_connection.output).properties.privateEndpointConnections
+#     : connection.name
+#     if
+#     endswith(connection.properties.privateLinkServiceConnectionState.description, azurerm_data_factory_managed_private_endpoint.storeape.name)
+#   ])
 
-}
+# }
 
-resource "azapi_update_resource" "approve_batch_storage_account_blob_private_endpoint_connection" {
-  type      = "Microsoft.Storage/storageAccounts/privateEndpointConnections@2022-09-01"
-  name      = local.storage_account_blob_private_endpoint_connection_name
-  parent_id = azurerm_storage_account.nwsdestoragea.id
+# resource "azapi_update_resource" "approve_batch_storage_account_blob_private_endpoint_connection" {
+#   type      = "Microsoft.Storage/storageAccounts/privateEndpointConnections@2022-09-01"
+#   name      = local.storage_account_blob_private_endpoint_connection_name
+#   parent_id = azurerm_storage_account.nwsdestoragea.id
 
-  body = jsonencode({
-    properties = {
-      privateLinkServiceConnectionState = {
-        description = "Approved via NWSDE workspace - ${azurerm_data_factory_managed_private_endpoint.storeape.name}"
-        status      = "Approved"
-      }
-    }
-  })
+#   body = jsonencode({
+#     properties = {
+#       privateLinkServiceConnectionState = {
+#         description = "Approved via NWSDE workspace - ${azurerm_data_factory_managed_private_endpoint.storeape.name}"
+#         status      = "Approved"
+#       }
+#     }
+#   })
 
-  lifecycle {
-    ignore_changes = all # We don't want to touch this after creation
-  }
-}
+#   lifecycle {
+#     ignore_changes = all # We don't want to touch this after creation
+#   }
+# }

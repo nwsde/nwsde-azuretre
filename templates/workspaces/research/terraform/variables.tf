@@ -63,6 +63,11 @@ variable "research_project_id" {
   description = "Research project identifier associated with the research data request that this TRE workspace will serve"
 }
 
+variable "data_engineering_ws_id" {
+  type        = string
+  description = "Specify the short identifier of the data engineering/lakehouse workspace this research workspace will listen on for research data"
+}
+
 variable "aad_redirect_uris_b64" {
   type    = string # B64 encoded list of objects like [{"name": "my uri 1", "value": "https://..."}, {}]
   default = "W10=" #b64 for []
