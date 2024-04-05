@@ -143,6 +143,12 @@
       }
     },
     {
+      "name": "data_engineering_ws_id",
+      "source": {
+        "env": "DATA_ENGINEERING_WS_ID"
+      }
+    },
+    {
       "name": "arm_environment",
       "source": {
         "env": "ARM_ENVIRONMENT"

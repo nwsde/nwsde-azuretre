@@ -28,7 +28,6 @@ module "network" {
 }
 
 module "adf" {
-  #count                       = var.enable_airlock ? 1 : 0
   source                      = "./adf"
   location                    = var.location
   tre_id                      = var.tre_id
@@ -36,9 +35,8 @@ module "adf" {
   short_workspace_id          = local.short_workspace_id
   tre_resource_id             = var.tre_resource_id
   research_project_id         = var.research_project_id
-
+  data_eng_ws_short_id        = var.data_engineering_ws_id
   depends_on = [ azurerm_storage_account.stg]
-
 }
 
 
