@@ -387,6 +387,12 @@ jobs:
              BUNDLE_DIR: "./templates/workspaces/unrestricted"}
           - {BUNDLE_TYPE: "workspace",
              BUNDLE_DIR: "./templates/workspaces/airlock-import-review"}
+# JR 22-Apr-2014 Add Lakehouse and Research Workspace bundles
+          - {BUNDLE_TYPE: "workspace",
+             BUNDLE_DIR: "./templates/workspaces/lakehouse"}
+          - {BUNDLE_TYPE: "workspace",
+             BUNDLE_DIR: "./templates/workspaces/research"}
+# End
           - {BUNDLE_TYPE: "workspace_service",
              BUNDLE_DIR: "./templates/workspace_services/guacamole"}
           - {BUNDLE_TYPE: "workspace_service",
@@ -546,6 +552,12 @@ jobs:
              BUNDLE_DIR: "./templates/workspaces/unrestricted"}
           - {BUNDLE_TYPE: "workspace",
              BUNDLE_DIR: "./templates/workspaces/airlock-import-review"}
+# JR 22-Apr-2014 Add Lakehouse and Research Workspace bundles
+          - {BUNDLE_TYPE: "workspace",
+             BUNDLE_DIR: "./templates/workspaces/lakehouse"}
+          - {BUNDLE_TYPE: "workspace",
+             BUNDLE_DIR: "./templates/workspaces/research"}
+# End
           - {BUNDLE_TYPE: "workspace_service",
              BUNDLE_DIR: "./templates/workspace_services/guacamole"}
           - {BUNDLE_TYPE: "workspace_service",
