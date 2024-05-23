@@ -19,14 +19,12 @@ RUN curl -o azuretre.tar.gz -L "https://github.com/microsoft/AzureTRE/archive/re
   && rm -rf azuretre.tar.gz
 
 # Copy and change the file extension of .terraform file to .tf
-COPY ./terraform/research-storage.terraform "${BUNDLE_DIR}"/terraform/research-storage.tf
 COPY ./terraform/research-variables.terraform "${BUNDLE_DIR}"/terraform/research-variables.tf
 COPY ./terraform/research-workspace.terraform "${BUNDLE_DIR}"/terraform/research-workspace.tf
-COPY ./terraform/research-adf/research-adf.terraform "${BUNDLE_DIR}"/terraform/research-adf/research-adf.tf
-COPY ./terraform/research-adf/research-data.terraform "${BUNDLE_DIR}"/terraform/research-adf/research-data.tf
-COPY ./terraform/research-adf/research-locals.terraform "${BUNDLE_DIR}"/terraform/research-adf/research-locals.tf
-COPY ./terraform/research-adf/research-providers.terraform "${BUNDLE_DIR}"/terraform/research-adf/research-providers.tf
-COPY ./terraform/research-adf/research-variables.terraform "${BUNDLE_DIR}"/terraform/research-adf/research-variables.tf
+COPY ./terraform/research-adf/adf.terraform "${BUNDLE_DIR}"/terraform/research-adf/adf.tf
+COPY ./terraform/research-adf/locals.terraform "${BUNDLE_DIR}"/terraform/research-adf/locals.tf
+COPY ./terraform/research-adf/providers.terraform "${BUNDLE_DIR}"/terraform/research-adf/providers.tf
+COPY ./terraform/research-adf/variables.terraform "${BUNDLE_DIR}"/terraform/research-adf/variables.tf
 
 # PORTER_MIXINS
 

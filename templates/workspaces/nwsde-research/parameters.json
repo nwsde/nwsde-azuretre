@@ -2,7 +2,7 @@
   "schemaType": "ParameterSet",
   "schemaVersion": "1.0.1",
   "namespace": "",
-  "name": "tre-workspace-lakehouse",
+  "name": "tre-workspace-nwsde-research",
   "parameters": [
     {
       "name": "address_spaces",
@@ -137,9 +137,15 @@
       }
     },
     {
-      "name": "enable_adf",
+      "name": "research_project_id",
       "source": {
-        "env": "ENABLE_ADF"
+        "env": "RESEARCH_PROJECT_ID"
+      }
+    },
+    {
+      "name": "data_engineering_ws_id",
+      "source": {
+        "env": "DATA_ENGINEERING_WS_ID"
       }
     },
     {

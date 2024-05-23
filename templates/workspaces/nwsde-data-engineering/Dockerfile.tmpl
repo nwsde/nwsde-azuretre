@@ -19,13 +19,12 @@ RUN curl -o azuretre.tar.gz -L "https://github.com/microsoft/AzureTRE/archive/re
   && rm -rf azuretre.tar.gz
 
 # Copy and change the file extension of .terraform file to .tf
-COPY ./terraform/lakehouse-variables.terraform "${BUNDLE_DIR}"/terraform/lakehouse-variables.tf
-COPY ./terraform/lakehouse-workspace.terraform "${BUNDLE_DIR}"/terraform/lakehouse-workspace.tf
-COPY ./terraform/lakehouse-adf/lakehouse-adf.terraform "${BUNDLE_DIR}"/terraform/lakehouse-adf/lakehouse-adf.tf
-COPY ./terraform/lakehouse-adf/lakehouse-data.terraform "${BUNDLE_DIR}"/terraform/lakehouse-adf/lakehouse-data.tf
-COPY ./terraform/lakehouse-adf/lakehouse-locals.terraform "${BUNDLE_DIR}"/terraform/lakehouse-adf/lakehouse-locals.tf
-COPY ./terraform/lakehouse-adf/lakehouse-providers.terraform "${BUNDLE_DIR}"/terraform/lakehouse-adf/lakehouse-providers.tf
-COPY ./terraform/lakehouse-adf/lakehouse-variables.terraform "${BUNDLE_DIR}"/terraform/lakehouse-adf/research-variables.tf
+COPY ./terraform/dataengineering-variables.terraform "${BUNDLE_DIR}"/terraform/dataengineering-variables.tf
+COPY ./terraform/dataengineering-workspace.terraform "${BUNDLE_DIR}"/terraform/dataengineering-workspace.tf
+COPY ./terraform/dataengineering-adf/adf.terraform "${BUNDLE_DIR}"/terraform/dataengineering-adf/adf.tf
+COPY ./terraform/dataengineering-adf/locals.terraform "${BUNDLE_DIR}"/terraform/dataengineering-adf/locals.tf
+COPY ./terraform/dataengineering-adf/providers.terraform "${BUNDLE_DIR}"/terraform/dataengineering-adf/providers.tf
+COPY ./terraform/dataengineering-adf/variables.terraform "${BUNDLE_DIR}"/terraform/dataengineering-adf/variables.tf
 
 # PORTER_MIXINS
 

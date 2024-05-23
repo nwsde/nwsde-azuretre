@@ -1,0 +1,129 @@
+############################################################
+# data
+############################################################
+
+data "azurerm_storage_account" "source_storage_account" {
+  name = var.workspace_storage_account_name
+  resource_group_name = var.workspace_resource_group_name
+}
+
+############################################################
+# resources
+############################################################
+
+// ADF
+//
+resource "azurerm_data_factory" "adf" {
+  name = local.adf_name
+  resource_group_name = var.workspace_resource_group_name
+  location = var.location
+  managed_virtual_network_enabled = true
+  public_network_enabled = false
+
+  identity {
+    type = "SystemAssigned"
+  }
+}
+
+// ADF integration runtime
+//
+resource "azurerm_data_factory_integration_runtime_azure" "adf_runtime" {
+  name = local.adf_integration_runtime_name
+  data_factory_id = azurerm_data_factory.adf.id
+  location = "AutoResolve"
+  virtual_network_enabled = true
+
+  depends_on = [
+    azurerm_data_factory.adf
+  ]
+}
+
+// ADF managed private endpoint - source storage account
+//
+resource "azurerm_data_factory_managed_private_endpoint" "adf_private_endpoint_source_storage" {
+  name = local.adf_managed_private_endpoint_source_storage_account_name
+  data_factory_id = azurerm_data_factory.adf.id
+  target_resource_id = data.azurerm_storage_account.source_storage_account.id
+  subresource_name = "blob"
+
+  depends_on = [
+    azurerm_data_factory.adf,
+    data.azurerm_storage_account.source_storage_account
+  ]
+}
+
+// ADF linked service - source storage account
+//
+resource "azurerm_data_factory_linked_service_azure_blob_storage" "adf_linked_service_source_storage" {
+  name = local.adf_linked_service_source_storage_account_name
+  data_factory_id = azurerm_data_factory.adf.id
+  integration_runtime_name = local.adf_integration_runtime_name
+  use_managed_identity = true
+  service_endpoint = data.azurerm_storage_account.source_storage_account.primary_blob_endpoint
+  storage_kind = "StorageV2"
+
+  depends_on = [
+    data.azurerm_storage_account.source_storage_account,
+    azurerm_data_factory.adf,
+    azurerm_data_factory_integration_runtime_azure.adf_runtime
+  ]
+}
+
+// Role assignment - source storage account
+//
+resource "azurerm_role_assignment" "role_assignment" {
+  scope = data.azurerm_storage_account.source_storage_account.id
+  role_definition_name = local.azure_role_storage_blob_data_contributor
+  principal_id = one(azurerm_data_factory.adf.identity).principal_id
+
+  depends_on = [
+    azurerm_data_factory.adf,
+    data.azurerm_storage_account.source_storage_account
+  ]
+}
+
+
+############################################################
+# azapi - private endpoint connection approval
+############################################################
+
+data "azapi_resource" "batch_storage_account_private_endpoint_connection" {
+  type = "Microsoft.Storage/storageAccounts@2022-09-01"
+  resource_id = data.azurerm_storage_account.source_storage_account.id
+  response_export_values = ["properties.privateEndpointConnections."]
+
+  depends_on = [
+    azurerm_data_factory_managed_private_endpoint.adf_private_endpoint_source_storage,
+    data.azurerm_storage_account.source_storage_account
+  ]
+}
+
+locals {
+
+  source_storage_account_blob_private_endpoint_connection_name = one([
+    for connection in jsondecode(data.azapi_resource.batch_storage_account_private_endpoint_connection.output).properties.privateEndpointConnections
+    : connection.name
+    if
+    endswith(connection.properties.privateLinkServiceConnectionState.description, azurerm_data_factory_managed_private_endpoint.adf_private_endpoint_source_storage.name)
+  ])
+
+}
+
+resource "azapi_update_resource" "approve_batch_storage_account_blob_private_endpoint_connection" {
+  type = "Microsoft.Storage/storageAccounts/privateEndpointConnections@2022-09-01"
+  name = local.source_storage_account_blob_private_endpoint_connection_name
+  parent_id = data.azurerm_storage_account.source_storage_account.id
+
+  body = jsonencode({
+    properties = {
+      privateLinkServiceConnectionState = {
+        description = "Approved via NWSDE workspace - ${azurerm_data_factory_managed_private_endpoint.adf_private_endpoint_source_storage.name}"
+        status = "Approved"
+      }
+    }
+  })
+
+  lifecycle {
+    ignore_changes = all
+  }
+}

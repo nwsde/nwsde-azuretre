@@ -1,0 +1,19 @@
+locals {
+
+  dataeng_resource_group_name = "rg-${var.tre_id}-ws-${var.data_eng_workspace_short_id}"
+  dataeng_storage_account_name = "stgws${var.data_eng_workspace_short_id}"
+  dataeng_storage_container_name = "goldplus"
+
+  adf_name = "adf-${var.tre_id}-dataeng-ws-${var.data_eng_workspace_short_id}"
+  adf_integration_runtime_name = "integration-runtime-${local.adf_name}"
+
+  adf_linked_service_source_storage_account_name = "linkedservice-${var.tre_id}-${local.dataeng_storage_account_name}"
+  adf_managed_private_endpoint_destination_storage_account_name = "managedpe-${var.tre_id}-${var.workspace_storage_account_name}"
+  adf_linked_service_destination_storage_account_name = "linkedservice-${var.tre_id}-${var.workspace_storage_account_name}"
+  adf_pipeline_name = "adf-pipeline-dataeng-to-ws${var.workspace_short_id}"
+  adf_dataset_source_name = "dataset_source_${local.dataeng_storage_account_name}_${var.workspace_short_id}"
+  adf_dataset_destination_name = "dataset_dest_${var.workspace_storage_account_name}"
+  adf_blob_trigger = "blob-trigger-${local.dataeng_storage_account_name}-${var.workspace_short_id}"
+
+  azure_role_storage_blob_data_contributor = "Storage Blob Data Contributor"
+}

@@ -1,21 +1,26 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema",
-  "$id": "https://github.com/microsoft/AzureTRE/templates/workspaces/lakehouse/template_schema.json",
+  "$id": "https://github.com/microsoft/AzureTRE/templates/workspaces/research/template_schema.json",
   "type": "object",
-  "title": "Lakehouse Workspace",
-  "description": "This workspace template is for the creation of a lakehouse within the TRE.",
+  "title": "North West SDE Research Workspace",
+  "description": "Workspace for North West SDE research.",
   "required": [
     "auth_type",
-    "address_space_size"
+    "address_space_size",
+    "research_project_id",
+    "data_engineering_ws_id"
   ],
   "authorizedRoles": [],
   "properties": {
-    "enable_adf": {
-      "type": "boolean",
-      "title": "Enable ADF",
-      "description": "For data pipelines between lakehouse and research workspaces",
-      "default": true,
-      "updateable": true
+    "research_project_id": {
+      "type": "string",
+      "title": "Research Project ID",
+      "description": "The research project id is the identifier associated with a research data request which this TRE workspace will serve"
+    },
+    "data_engineering_ws_id": {
+      "type": "string",
+      "title": "Data Engineering Workspace Short ID",
+      "description": "Specify the short identifier of the data engineering workspace this research workspace will listen on for research data"
     },
     "shared_storage_quota": {
       "type": "integer",
@@ -290,7 +295,8 @@
       "display_name",
       "description",
       "overview",
-      "enable_adf",
+      "research_project_id",
+      "data_engineering_ws_id",
       "shared_storage_quota",
       "app_service_plan_sku",
       "address_space_size",
