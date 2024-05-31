@@ -41,6 +41,7 @@ resource "azurerm_data_factory_managed_private_endpoint" "adf_private_endpoint_d
 //
 resource "azurerm_data_factory_linked_service_azure_file_storage" "adf_linked_service_destination" {
   name = local.adf_linked_service_destination_storage_account_name
+  description = "Please note: the Azure Portal may not show this Linked Service using a Managed Private Endpoint, however it is indeed using one - if you remove the Managed Private Endpoint this Linked Service will stop working. This appears to be a quirk when deploying with Terraform."
   data_factory_id = data.azurerm_data_factory.adf.id
   integration_runtime_name = local.adf_integration_runtime_name
   connection_string = data.azurerm_storage_account.destination_storage.primary_connection_string
@@ -71,8 +72,7 @@ resource "azurerm_data_factory_dataset_binary" "adf_dataset_destination" {
   linked_service_name = azurerm_data_factory_linked_service_azure_file_storage.adf_linked_service_destination.name
 
   azure_blob_storage_location {
-    container = var.workspace_fileshare_name
-    path = var.research_project_id
+    container = var.research_project_id
   }
 }
 
