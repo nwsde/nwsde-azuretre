@@ -2,21 +2,10 @@
 # data
 ############################################################
 
-data "azurerm_data_factory" "adf" {
-  name = local.adf_name
-  resource_group_name = local.dataeng_resource_group_name
-}
-
-data "azurerm_storage_account" "source_storage" {
-  name = local.dataeng_storage_account_name
-  resource_group_name = local.dataeng_resource_group_name
-}
-
-data "azurerm_storage_account" "destination_storage" {
-  name = var.workspace_storage_account_name
-  resource_group_name = var.workspace_resource_group_name
-}
-
+  data "azurerm_data_factory" "adf" {
+    name = local.adf_name
+    resource_group_name = local.dataeng_resource_group_name
+  }
 
 ############################################################
 # resources
@@ -57,6 +46,7 @@ resource "azurerm_data_factory_linked_service_azure_file_storage" "adf_linked_se
   connection_string = data.azurerm_storage_account.destination_storage.primary_connection_string
   file_share = var.workspace_fileshare_name
 
+
   depends_on = [
     data.azurerm_storage_account.destination_storage,
     data.azurerm_data_factory.adf,
@@ -75,11 +65,15 @@ resource "azurerm_data_factory_dataset_azure_blob" "adf_dataset_source" {
 
 // Dataset - destination
 //
-resource "azurerm_data_factory_dataset_azure_blob" "adf_dataset_destination" {
+resource "azurerm_data_factory_dataset_binary" "adf_dataset_destination" {
   name = local.adf_dataset_destination_name
   data_factory_id = data.azurerm_data_factory.adf.id
   linked_service_name = azurerm_data_factory_linked_service_azure_file_storage.adf_linked_service_destination.name
-  path = var.research_project_id
+
+  azure_blob_storage_location {
+    container = var.workspace_fileshare_name
+    path = var.research_project_id
+  }
 }
 
 // ADF pipeline
@@ -93,13 +87,13 @@ resource "azurerm_data_factory_pipeline" "ws_pipeline" {
     copy-activity-name = "${var.workspace_short_id}-ws-pipe"
     dataset-source = "${azurerm_data_factory_dataset_azure_blob.adf_dataset_source.name}"
     dataset-source-path = "${azurerm_data_factory_dataset_azure_blob.adf_dataset_source.path}"
-    dataset-dest = "${azurerm_data_factory_dataset_azure_blob.adf_dataset_destination.name}"
-    dataset-dest-path = "${azurerm_data_factory_dataset_azure_blob.adf_dataset_destination.name}"
+    dataset-dest = "${azurerm_data_factory_dataset_binary.adf_dataset_destination.name}"
+    dataset-dest-path = "${azurerm_data_factory_dataset_binary.adf_dataset_destination.name}"
   })
 
   depends_on = [
     azurerm_data_factory_dataset_azure_blob.adf_dataset_source,
-    azurerm_data_factory_dataset_azure_blob.adf_dataset_destination
+    azurerm_data_factory_dataset_binary.adf_dataset_destination
   ]
 }
 
@@ -137,7 +131,11 @@ data "azapi_resource" "batch_storage_account_private_endpoint_connection" {
   type = "Microsoft.Storage/storageAccounts@2022-09-01"
   resource_id = data.azurerm_storage_account.destination_storage.id
   response_export_values = ["properties.privateEndpointConnections."]
-  depends_on = [azurerm_data_factory_managed_private_endpoint.adf_private_endpoint_destination]
+
+  depends_on = [
+    azurerm_data_factory_managed_private_endpoint.adf_private_endpoint_destination,
+    data.azurerm_storage_account.destination_storage
+  ]
 }
 
 locals {
@@ -157,11 +155,15 @@ resource "azapi_update_resource" "approve_batch_storage_account_file_private_end
   body = jsonencode({
     properties = {
       privateLinkServiceConnectionState = {
-        description = "Approved via NWSDE research workspace - ${azurerm_data_factory_managed_private_endpoint.adf_private_endpoint_destination.name}"
+        description = "Approved via nwsde-research workspace deployment - Workspace ${var.workspace_short_id}"
         status = "Approved"
       }
     }
   })
+
+  depends_on = [
+    data.azapi_resource.batch_storage_account_private_endpoint_connection
+  ]
 
   lifecycle {
     ignore_changes = all

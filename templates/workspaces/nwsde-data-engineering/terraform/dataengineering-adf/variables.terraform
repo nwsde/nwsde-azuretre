@@ -25,3 +25,11 @@ variable "workspace_storage_account_name" {
 variable "workspace_short_id" {
   type = string
 }
+
+variable "storage_account_blob_private_endpoint_dependency" {
+  type = any
+}
+
+variable "storage_account_network_rules_dependency" {
+  type = any
+}

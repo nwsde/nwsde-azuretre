@@ -10,6 +10,8 @@ module "lakehouse-adf" {
   workspace_resource_group_name = azurerm_resource_group.ws.name
   workspace_storage_account_name = azurerm_storage_account.stg.name
   workspace_short_id = local.short_workspace_id
+  storage_account_blob_private_endpoint_dependency = azurerm_private_endpoint.stgblobpe
+  storage_account_network_rules_dependency = azurerm_storage_account_network_rules.stgrules
 
   depends_on = [
     module.network

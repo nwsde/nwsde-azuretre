@@ -1,13 +1,4 @@
 ############################################################
-# data
-############################################################
-
-data "azurerm_storage_account" "source_storage_account" {
-  name = var.workspace_storage_account_name
-  resource_group_name = var.workspace_resource_group_name
-}
-
-############################################################
 # resources
 ############################################################
 
@@ -19,6 +10,10 @@ resource "azurerm_data_factory" "adf" {
   location = var.location
   managed_virtual_network_enabled = true
   public_network_enabled = false
+
+  tags = {
+    "${local.adf_tag_name_dataeng_output_storage_container_name}" = "${local.dataeng_output_storage_container}"
+  }
 
   identity {
     type = "SystemAssigned"
@@ -117,11 +112,15 @@ resource "azapi_update_resource" "approve_batch_storage_account_blob_private_end
   body = jsonencode({
     properties = {
       privateLinkServiceConnectionState = {
-        description = "Approved via NWSDE workspace - ${azurerm_data_factory_managed_private_endpoint.adf_private_endpoint_source_storage.name}"
+        description = "Approved via nwsde-data-engineering workspace deployment - Workspace ${var.workspace_short_id}"
         status = "Approved"
       }
     }
   })
+
+  depends_on = [
+    data.azapi_resource.batch_storage_account_private_endpoint_connection
+  ]
 
   lifecycle {
     ignore_changes = all

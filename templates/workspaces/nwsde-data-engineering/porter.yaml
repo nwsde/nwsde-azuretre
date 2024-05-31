@@ -1,7 +1,7 @@
 ---
 schemaVersion: 1.0.0
 name: tre-workspace-nwsde-data-engineering
-version: 1.6.1
+version: 1.6.4
 description: "A workspace for North West SDE Data Engineering"
 dockerfile: Dockerfile.tmpl
 registry: azuretre
