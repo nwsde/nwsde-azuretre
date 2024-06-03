@@ -155,7 +155,7 @@ resource "azapi_update_resource" "approve_batch_storage_account_file_private_end
   body = jsonencode({
     properties = {
       privateLinkServiceConnectionState = {
-        description = "Approved via nwsde-research workspace deployment - Workspace ${var.workspace_short_id}"
+        description = "Approved via nwsde-research workspace ${var.workspace_short_id} deployment - ${azurerm_data_factory_managed_private_endpoint.adf_private_endpoint_destination.name}"  # PE endpoint name required as suffix
         status = "Approved"
       }
     }
