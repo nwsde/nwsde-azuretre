@@ -33,3 +33,9 @@ variable "research_project_id" {
 variable "data_eng_workspace_short_id" {
   type = string
 }
+
+variable "arm_use_msi" {
+  type = bool
+}
+
+

@@ -1,7 +1,7 @@
 ---
 schemaVersion: 1.0.0
 name: tre-workspace-nwsde-data-engineering
-version: 1.6.7
+version: 1.8.5
 description: "A workspace for North West SDE Data Engineering"
 dockerfile: Dockerfile.tmpl
 registry: azuretre
@@ -114,9 +114,6 @@ parameters:
   - name: enable_airlock
     type: boolean
     default: false
-  - name: enable_adf
-    type: boolean
-    default: true
   - name: arm_environment
     type: string
 
@@ -185,8 +182,8 @@ install:
         aad_redirect_uris_b64: ${ bundle.parameters.aad_redirect_uris }
         app_service_plan_sku: ${ bundle.parameters.app_service_plan_sku }
         enable_airlock: ${ bundle.parameters.enable_airlock }
-        enable_adf: ${ bundle.parameters.enable_adf }
         arm_environment: ${ bundle.parameters.arm_environment }
+        arm_use_msi: ${ bundle.parameters.arm_use_msi }
       backendConfig:
         resource_group_name: ${ bundle.parameters.tfstate_resource_group_name }
         storage_account_name: ${ bundle.parameters.tfstate_storage_account_name }
@@ -226,8 +223,8 @@ upgrade:
         aad_redirect_uris_b64: ${ bundle.parameters.aad_redirect_uris }
         app_service_plan_sku: ${ bundle.parameters.app_service_plan_sku }
         enable_airlock: ${ bundle.parameters.enable_airlock }
-        enable_adf: ${ bundle.parameters.enable_adf }
         arm_environment: ${ bundle.parameters.arm_environment }
+        arm_use_msi: ${ bundle.parameters.arm_use_msi }
       backendConfig:
         resource_group_name: ${ bundle.parameters.tfstate_resource_group_name }
         storage_account_name: ${ bundle.parameters.tfstate_storage_account_name }
@@ -290,8 +287,8 @@ uninstall:
         aad_redirect_uris_b64: ${ bundle.parameters.aad_redirect_uris }
         app_service_plan_sku: ${ bundle.parameters.app_service_plan_sku }
         enable_airlock: ${ bundle.parameters.enable_airlock }
-        enable_adf: ${ bundle.parameters.enable_adf }
         arm_environment: ${ bundle.parameters.arm_environment }
+        arm_use_msi: ${ bundle.parameters.arm_use_msi }
       backendConfig:
         resource_group_name: ${ bundle.parameters.tfstate_resource_group_name }
         storage_account_name: ${ bundle.parameters.tfstate_storage_account_name }

@@ -1,7 +1,7 @@
 ---
 schemaVersion: 1.0.0
 name: tre-workspace-nwsde-research
-version: 1.7.3
+version: 1.8.5
 description: "A workspace for North West SDE Research"
 dockerfile: Dockerfile.tmpl
 registry: azuretre
@@ -189,6 +189,7 @@ install:
         research_project_id: ${ bundle.parameters.research_project_id }
         data_engineering_ws_id: ${ bundle.parameters.data_engineering_ws_id }
         arm_environment: ${ bundle.parameters.arm_environment }
+        arm_use_msi: ${ bundle.parameters.arm_use_msi }
       backendConfig:
         resource_group_name: ${ bundle.parameters.tfstate_resource_group_name }
         storage_account_name: ${ bundle.parameters.tfstate_storage_account_name }
@@ -231,6 +232,7 @@ upgrade:
         research_project_id: ${ bundle.parameters.research_project_id }
         data_engineering_ws_id: ${ bundle.parameters.data_engineering_ws_id }
         arm_environment: ${ bundle.parameters.arm_environment }
+        arm_use_msi: ${ bundle.parameters.arm_use_msi }
       backendConfig:
         resource_group_name: ${ bundle.parameters.tfstate_resource_group_name }
         storage_account_name: ${ bundle.parameters.tfstate_storage_account_name }
@@ -296,6 +298,7 @@ uninstall:
         research_project_id: ${ bundle.parameters.research_project_id }
         data_engineering_ws_id: ${ bundle.parameters.data_engineering_ws_id }
         arm_environment: ${ bundle.parameters.arm_environment }
+        arm_use_msi: ${ bundle.parameters.arm_use_msi }
       backendConfig:
         resource_group_name: ${ bundle.parameters.tfstate_resource_group_name }
         storage_account_name: ${ bundle.parameters.tfstate_storage_account_name }

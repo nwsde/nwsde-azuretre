@@ -1,4 +1,11 @@
 ############################################################
+# data
+############################################################
+
+data "azurerm_client_config" "current" {
+}
+
+############################################################
 # resources
 ############################################################
 
@@ -79,50 +86,36 @@ resource "azurerm_role_assignment" "role_assignment" {
 
 
 ############################################################
-# azapi - private endpoint connection approval
+# private endpoint connection approval
 ############################################################
 
-data "azapi_resource" "batch_storage_account_private_endpoint_connection" {
-  type = "Microsoft.Storage/storageAccounts@2022-09-01"
-  resource_id = data.azurerm_storage_account.source_storage_account.id
-  response_export_values = ["properties.privateEndpointConnections."]
+resource "terraform_data" "private_endpoint_approval" {
+  provisioner "local-exec" {
+    command = <<-EOT
 
-  depends_on = [
-    azurerm_data_factory_managed_private_endpoint.adf_private_endpoint_source_storage,
-    data.azurerm_storage_account.source_storage_account
-  ]
-}
+          if ${var.arm_use_msi ? "true" : "false"}; then
+            az login --identity --username '${data.azurerm_client_config.current.client_id}'
+          else
+            echo Local authentication not implemented
+            exit 1
+          fi
 
-locals {
+          pe_connection_id=$(az network private-endpoint-connection list --id ${data.azurerm_storage_account.source_storage_account.id} --query "[?contains(properties.privateEndpoint.id, '${azurerm_data_factory.adf.name}') && properties.privateLinkServiceConnectionState.status != 'Approved'].id" --output tsv)
 
-  source_storage_account_blob_private_endpoint_connection_name = one([
-    for connection in jsondecode(data.azapi_resource.batch_storage_account_private_endpoint_connection.output).properties.privateEndpointConnections
-    : connection.name
-    if
-    endswith(connection.properties.privateLinkServiceConnectionState.description, azurerm_data_factory_managed_private_endpoint.adf_private_endpoint_source_storage.name)
-  ])
+          if [ -n "$pe_connection_id" ]; then
+            az network private-endpoint-connection approve --id "$pe_connection_id" --description "Approved via nwsde-data-engineering workspace deployment - Workspace ${var.workspace_short_id}"
+          fi
 
-}
-
-resource "azapi_update_resource" "approve_batch_storage_account_blob_private_endpoint_connection" {
-  type = "Microsoft.Storage/storageAccounts/privateEndpointConnections@2022-09-01"
-  name = local.source_storage_account_blob_private_endpoint_connection_name
-  parent_id = data.azurerm_storage_account.source_storage_account.id
-
-  body = jsonencode({
-    properties = {
-      privateLinkServiceConnectionState = {
-        description = "Approved via nwsde-data-engineering workspace ${var.workspace_short_id} deployment - ${azurerm_data_factory_managed_private_endpoint.adf_private_endpoint_source_storage.name}"  # PE endpoint name required as suffix
-        status = "Approved"
-      }
-    }
-  })
-
-  depends_on = [
-    data.azapi_resource.batch_storage_account_private_endpoint_connection
-  ]
-
-  lifecycle {
-    ignore_changes = all
+        EOT
   }
+
+  triggers_replace = [
+    azurerm_data_factory_managed_private_endpoint.adf_private_endpoint_source_storage.id
+  ]
+
+  depends_on = [
+    azurerm_data_factory.adf,
+    data.azurerm_storage_account.source_storage_account,
+    azurerm_data_factory_managed_private_endpoint.adf_private_endpoint_source_storage
+  ]
 }

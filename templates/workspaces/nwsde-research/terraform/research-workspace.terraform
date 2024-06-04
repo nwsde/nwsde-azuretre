@@ -10,6 +10,7 @@ module "research-adf" {
   workspace_short_id = local.short_workspace_id
   research_project_id = var.research_project_id
   data_eng_workspace_short_id = var.data_engineering_ws_id
+  arm_use_msi = var.arm_use_msi
 
   depends_on = [
     azurerm_storage_account.stg

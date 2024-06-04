@@ -137,12 +137,6 @@
       }
     },
     {
-      "name": "enable_adf",
-      "source": {
-        "env": "ENABLE_ADF"
-      }
-    },
-    {
       "name": "arm_environment",
       "source": {
         "env": "ARM_ENVIRONMENT"

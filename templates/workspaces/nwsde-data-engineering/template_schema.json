@@ -10,13 +10,6 @@
   ],
   "authorizedRoles": [],
   "properties": {
-    "enable_adf": {
-      "type": "boolean",
-      "title": "Enable ADF",
-      "description": "For data pipelines between lakehouse and research workspaces",
-      "default": true,
-      "updateable": true
-    },
     "shared_storage_quota": {
       "type": "integer",
       "title": "Shared Storage Quota",
@@ -290,7 +283,6 @@
       "display_name",
       "description",
       "overview",
-      "enable_adf",
       "shared_storage_quota",
       "app_service_plan_sku",
       "address_space_size",

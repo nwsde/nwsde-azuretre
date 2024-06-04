@@ -1,5 +1,4 @@
-module "lakehouse-adf" {
-  count = var.enable_adf ? 1 : 0
+module "dataengineering-adf" {
 
   source = "./dataengineering-adf"
 
@@ -12,6 +11,7 @@ module "lakehouse-adf" {
   workspace_short_id = local.short_workspace_id
   storage_account_blob_private_endpoint_dependency = azurerm_private_endpoint.stgblobpe
   storage_account_network_rules_dependency = azurerm_storage_account_network_rules.stgrules
+  arm_use_msi = var.arm_use_msi
 
   depends_on = [
     module.network

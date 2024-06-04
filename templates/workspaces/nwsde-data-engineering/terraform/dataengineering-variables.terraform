@@ -1,5 +1,4 @@
-variable "enable_adf" {
-  type        = bool
-  default     = true
-  description = "Controls whether to deploy ADF as primary orchestration service"
+variable "arm_use_msi" {
+  type        = string
+  description = "Used as an environment variable to determine if Terraform should use a managed identity"
 }
