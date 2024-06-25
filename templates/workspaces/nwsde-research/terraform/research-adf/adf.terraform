@@ -1,0 +1,160 @@
+############################################################
+# data
+############################################################
+
+data "azurerm_data_factory" "adf" {
+  name = local.adf_name
+  resource_group_name = local.dataeng_resource_group_name
+}
+
+data "azurerm_client_config" "current" {
+}
+
+############################################################
+# resources
+############################################################
+
+// Role assignment - destination storage account
+//
+resource "azurerm_role_assignment" "role_assignment" {
+  scope = data.azurerm_storage_account.destination_storage.id
+  role_definition_name = local.azure_role_storage_blob_data_contributor
+  principal_id = one(data.azurerm_data_factory.adf.identity).principal_id
+
+  depends_on = [
+    data.azurerm_data_factory.adf,
+    data.azurerm_storage_account.destination_storage
+  ]
+}
+
+// ADF managed private endpoint - destination storage account (file share)
+//
+resource "azurerm_data_factory_managed_private_endpoint" "adf_private_endpoint_destination" {
+  name = local.adf_managed_private_endpoint_destination_storage_account_name
+  data_factory_id = data.azurerm_data_factory.adf.id
+  target_resource_id = data.azurerm_storage_account.destination_storage.id
+  subresource_name = "file"
+
+  depends_on = [
+    data.azurerm_storage_account.destination_storage
+  ]
+}
+
+// Linked service - destination storage account (file share)
+//
+resource "azurerm_data_factory_linked_service_azure_file_storage" "adf_linked_service_destination" {
+  name = local.adf_linked_service_destination_storage_account_name
+  description = "Please note: the Azure Portal may not show this Linked Service using a Managed Private Endpoint, however it is indeed using one - if you remove the Managed Private Endpoint this Linked Service will stop working. This appears to be a quirk when deploying with Terraform."
+  data_factory_id = data.azurerm_data_factory.adf.id
+  integration_runtime_name = local.adf_integration_runtime_name
+  connection_string = data.azurerm_storage_account.destination_storage.primary_connection_string
+  file_share = var.workspace_fileshare_name
+
+
+  depends_on = [
+    data.azurerm_storage_account.destination_storage,
+    data.azurerm_data_factory.adf,
+    azurerm_data_factory_managed_private_endpoint.adf_private_endpoint_destination
+  ]
+}
+
+// Dataset - source
+//
+resource "azurerm_data_factory_dataset_azure_blob" "adf_dataset_source" {
+  name = local.adf_dataset_source_name
+  data_factory_id = data.azurerm_data_factory.adf.id
+  linked_service_name = local.adf_linked_service_source_storage_account_name
+  path = "/${local.dataeng_storage_container_name}/${var.research_project_id}"
+}
+
+// Dataset - destination
+//
+resource "azurerm_data_factory_dataset_binary" "adf_dataset_destination" {
+  name = local.adf_dataset_destination_name
+  data_factory_id = data.azurerm_data_factory.adf.id
+  linked_service_name = azurerm_data_factory_linked_service_azure_file_storage.adf_linked_service_destination.name
+
+  azure_blob_storage_location {
+    container = var.research_project_id
+  }
+}
+
+// ADF pipeline
+//
+resource "azurerm_data_factory_pipeline" "ws_pipeline" {
+  name = local.adf_pipeline_name
+  data_factory_id = data.azurerm_data_factory.adf.id
+
+  activities_json = templatefile("${path.module}/adf-pipeline-activities/copy-pipeline-activities.json",
+  {
+    copy-activity-name = "${var.workspace_short_id}-ws-pipe"
+    dataset-source = "${azurerm_data_factory_dataset_azure_blob.adf_dataset_source.name}"
+    dataset-source-path = "${azurerm_data_factory_dataset_azure_blob.adf_dataset_source.path}"
+    dataset-dest = "${azurerm_data_factory_dataset_binary.adf_dataset_destination.name}"
+    dataset-dest-path = "${azurerm_data_factory_dataset_binary.adf_dataset_destination.name}"
+  })
+
+  depends_on = [
+    azurerm_data_factory_dataset_azure_blob.adf_dataset_source,
+    azurerm_data_factory_dataset_binary.adf_dataset_destination
+  ]
+}
+
+// ADF blob trigger
+//
+resource "azurerm_data_factory_trigger_blob_event" "ws_pipeline_trigger" {
+  name = local.adf_blob_trigger
+  data_factory_id = data.azurerm_data_factory.adf.id
+  storage_account_id = data.azurerm_storage_account.source_storage.id
+
+  events = [
+    "Microsoft.Storage.BlobCreated",
+    "Microsoft.Storage.BlobDeleted"
+  ]
+
+  blob_path_begins_with = "/${local.dataeng_storage_container_name}/blobs/${var.research_project_id}/"
+  ignore_empty_blobs = true
+  activated = true
+
+  pipeline {
+    name = azurerm_data_factory_pipeline.ws_pipeline.name
+  }
+
+  depends_on = [
+    azurerm_data_factory_pipeline.ws_pipeline
+  ]
+}
+
+
+############################################################
+# private endpoint connection approval
+############################################################
+
+resource "terraform_data" "private_endpoint_approval" {
+  provisioner "local-exec" {
+    command = <<-EOT
+          if ${var.arm_use_msi ? "true" : "false"}; then
+            az login --identity --username '${data.azurerm_client_config.current.client_id}'
+          else
+            echo Local authentication not implemented
+            exit 1
+          fi
+
+          pe_connection_id=$(az network private-endpoint-connection list --id ${data.azurerm_storage_account.destination_storage.id} --query "[?contains(properties.privateEndpoint.id, '${data.azurerm_data_factory.adf.name}') && properties.privateLinkServiceConnectionState.status != 'Approved'].id" --output tsv)
+
+          if [ -n "$pe_connection_id" ]; then
+            az network private-endpoint-connection approve --id "$pe_connection_id" --description "Approved via nwsde-research workspace deployment - Workspace ${var.workspace_short_id}"
+          fi
+        EOT
+  }
+
+  triggers_replace = [
+    azurerm_data_factory_managed_private_endpoint.adf_private_endpoint_destination.id
+  ]
+
+  depends_on = [
+    data.azurerm_data_factory.adf,
+    data.azurerm_storage_account.destination_storage,
+    azurerm_data_factory_managed_private_endpoint.adf_private_endpoint_destination
+  ]
+}
