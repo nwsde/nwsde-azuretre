@@ -1,0 +1,41 @@
+variable "location" {
+  type = string
+}
+
+variable "tre_id" {
+  type = string
+}
+
+variable "tre_resource_id" {
+  type = string
+}
+
+variable "workspace_resource_group_name" {
+  type = string
+}
+
+variable "workspace_storage_account_name" {
+  type = string
+}
+
+variable "workspace_fileshare_name" {
+  type = string
+}
+
+variable "workspace_short_id" {
+  type = string
+}
+
+variable "research_project_id" {
+  type = string
+}
+
+variable "data_eng_workspace_short_id" {
+  type = string
+}
+
+variable "arm_use_msi" {
+  type = bool
+}
+
+
