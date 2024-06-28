@@ -27,3 +27,13 @@ variable "firewall_sku" {
   type    = string
   default = ""
 }
+
+variable "service_bus_sku" {
+  type    = string
+  default = "Standard"
+}
+
+variable "service_bus_fqdn" {
+  type     = string
+  default  = "sb-nwsdetest.servicebus.windows.net"
+}

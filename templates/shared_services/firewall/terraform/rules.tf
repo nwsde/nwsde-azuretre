@@ -192,6 +192,32 @@ resource "azurerm_firewall_policy_rule_collection_group" "core" {
     }
   }
 
+  dynamic "application_rule_collection" {
+    for_each = var.service_bus_sku == "Premium" ? [1] : []
+
+    content {
+      name     = "arc-service-bus-standard-sku"
+      priority = 305
+      action   = "Allow"
+
+      rule {
+        name = "service-bus"
+        protocols {
+          port = "443"
+          type = "Https"
+        }
+        destination_fqdns = [
+          "${var.service_bus_fqdn}"
+        ]
+        source_ip_groups = [
+          data.azurerm_ip_group.web.id,
+          data.azurerm_ip_group.resource_processor.id,
+          data.azurerm_ip_group.airlock_processor.id
+        ]
+      }
+    }
+  }
+
   depends_on = [
     azurerm_firewall.fw
   ]
