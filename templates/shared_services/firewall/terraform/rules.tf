@@ -193,7 +193,7 @@ resource "azurerm_firewall_policy_rule_collection_group" "core" {
   }
 
   dynamic "application_rule_collection" {
-    for_each = var.service_bus_sku == "Premium" ? [1] : []
+    for_each = var.service_bus_sku == "Premium" ? [] : [1]
 
     content {
       name     = "arc-service-bus-standard-sku"
