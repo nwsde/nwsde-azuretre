@@ -189,7 +189,7 @@ variable "firewall_sku" {
 variable "service_bus_sku" {
   description = "Azure Service Bus SKU"
   type = string
-  default = "Premium"
+  default = "Standard"
 }
 
 variable "rp_bundle_values" {
