@@ -2,9 +2,9 @@ resource "azurerm_servicebus_namespace" "sb" {
   name                         = "sb-${var.tre_id}"
   location                     = azurerm_resource_group.core.location
   resource_group_name          = azurerm_resource_group.core.name
-  sku                          = "Premium"
-  premium_messaging_partitions = "1"
-  capacity                     = "1"
+  sku                          = var.service_bus_sku
+  premium_messaging_partitions = var.service_bus_sku == local.PREMIUM_SKU ? "1" : "0"
+  capacity                     = var.service_bus_sku == local.PREMIUM_SKU ? "1" : "0"
   tags                         = local.tre_core_tags
 
   # Block public access
@@ -17,15 +17,19 @@ resource "azurerm_servicebus_namespace" "sb" {
 
     # We must enable the Airlock events subnet to access the SB, as the Eventgrid topics can't send messages over PE
     # https://docs.microsoft.com/en-us/azure/event-grid/consume-private-endpoints
-    default_action                = "Deny"
+    default_action                = "Allow"                                                     # SB SKU - TODO Change back to Deny once fw IP rule added
     public_network_access_enabled = true
-    network_rules {
-      subnet_id                            = module.network.airlock_events_subnet_id
-      ignore_missing_vnet_service_endpoint = false
+
+    dynamic "network_rules" {
+      for_each = var.service_bus_sku == local.PREMIUM_SKU ? [1] : []
+      content {
+        subnet_id                            = module.network.airlock_events_subnet_id
+        ignore_missing_vnet_service_endpoint = false
+      }
     }
   }
 
-  lifecycle { ignore_changes = [tags] }
+  lifecycle { ignore_changes = [tags, sku] }  # not possible to change the service bus sku once created
 }
 
 resource "azurerm_servicebus_queue" "workspacequeue" {
@@ -42,13 +46,15 @@ resource "azurerm_servicebus_queue" "service_bus_deployment_status_update_queue"
 
   # The returned payload might be large, especially for errors.
   # Cosmos is the final destination of the messages where 2048 is the limit.
-  max_message_size_in_kilobytes = 2048 # default=1024
+  max_message_size_in_kilobytes = var.service_bus_sku == local.PREMIUM_SKU ? 2048 : null # default=1024
 
   enable_partitioning = false
   requires_session    = true
 }
 
 resource "azurerm_private_dns_zone" "servicebus" {
+  count = var.service_bus_sku == local.PREMIUM_SKU ? 1 : 0
+
   name                = module.terraform_azurerm_environment_configuration.private_links["privatelink.servicebus.windows.net"]
   resource_group_name = azurerm_resource_group.core.name
   tags                = local.tre_core_tags
@@ -56,9 +62,11 @@ resource "azurerm_private_dns_zone" "servicebus" {
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "servicebuslink" {
+  count = var.service_bus_sku == local.PREMIUM_SKU ? 1 : 0
+
   name                  = "servicebuslink"
   resource_group_name   = azurerm_resource_group.core.name
-  private_dns_zone_name = azurerm_private_dns_zone.servicebus.name
+  private_dns_zone_name = azurerm_private_dns_zone.servicebus[0].name
   virtual_network_id    = module.network.core_vnet_id
   tags                  = local.tre_core_tags
 
@@ -66,6 +74,8 @@ resource "azurerm_private_dns_zone_virtual_network_link" "servicebuslink" {
 }
 
 resource "azurerm_private_endpoint" "sbpe" {
+  count = var.service_bus_sku == local.PREMIUM_SKU ? 1 : 0
+
   name                = "pe-${azurerm_servicebus_namespace.sb.name}"
   location            = azurerm_resource_group.core.location
   resource_group_name = azurerm_resource_group.core.name
@@ -76,7 +86,7 @@ resource "azurerm_private_endpoint" "sbpe" {
 
   private_dns_zone_group {
     name                 = "private-dns-zone-group"
-    private_dns_zone_ids = [azurerm_private_dns_zone.servicebus.id]
+    private_dns_zone_ids = [azurerm_private_dns_zone.servicebus[0].id]
   }
 
   private_service_connection {
