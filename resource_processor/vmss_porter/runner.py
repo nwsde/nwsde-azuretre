@@ -16,6 +16,7 @@ from contextlib import asynccontextmanager
 from azure.servicebus import ServiceBusMessage, NEXT_AVAILABLE_SESSION
 from azure.servicebus.exceptions import OperationTimeoutError, ServiceBusConnectionError
 from azure.servicebus.aio import ServiceBusClient, AutoLockRenewer
+from azure.servicebus._common.constants import TransportType
 from azure.identity.aio import DefaultAzureCredential
 
 
@@ -249,7 +250,7 @@ async def get_porter_outputs(msg_body: dict, config: dict):
 async def runner(process_number: int, config: dict):
     with tracer.start_as_current_span(process_number):
         async with default_credentials(config["vmss_msi_id"]) as credential:
-            service_bus_client = ServiceBusClient(config["service_bus_namespace"], credential)
+            service_bus_client = ServiceBusClient(config["service_bus_namespace"], credential, transport_type=TransportType.AmqpOverWebsocket)
             await receive_message(service_bus_client, config)
 
 

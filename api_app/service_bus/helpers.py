@@ -1,8 +1,10 @@
 from azure.servicebus import ServiceBusMessage
 from azure.servicebus.aio import ServiceBusClient
+from azure.servicebus._common.constants import TransportType
 from pydantic import parse_obj_as
 from db.repositories.resources_history import ResourceHistoryRepository
 from service_bus.substitutions import substitute_properties
+from azure.servicebus._common.constants import TransportType
 from models.domain.resource_template import PipelineStep
 from models.domain.operation import OperationStep
 from models.domain.resource import Resource, ResourceType
@@ -25,7 +27,7 @@ async def _send_message(message: ServiceBusMessage, queue: str):
     :type queue: str
     """
     async with credentials.get_credential_async_context() as credential:
-        service_bus_client = ServiceBusClient(config.SERVICE_BUS_FULLY_QUALIFIED_NAMESPACE, credential)
+        service_bus_client = ServiceBusClient(config.SERVICE_BUS_FULLY_QUALIFIED_NAMESPACE, credential, transport_type=TransportType.AmqpOverWebsocket)
 
         async with service_bus_client:
             sender = service_bus_client.get_queue_sender(queue_name=queue)

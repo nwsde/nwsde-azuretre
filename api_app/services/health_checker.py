@@ -1,6 +1,7 @@
 from typing import Tuple
 from azure.core import exceptions
 from azure.servicebus.aio import ServiceBusClient
+from azure.servicebus._common.constants import TransportType
 from azure.mgmt.compute.aio import ComputeManagementClient
 from azure.cosmos.exceptions import CosmosHttpResponseError
 from azure.cosmos.aio import ContainerProxy
@@ -37,7 +38,7 @@ async def create_service_bus_status(credential) -> Tuple[StatusEnum, str]:
     status = StatusEnum.ok
     message = ""
     try:
-        service_bus_client = ServiceBusClient(config.SERVICE_BUS_FULLY_QUALIFIED_NAMESPACE, credential, retry_total=0)
+        service_bus_client = ServiceBusClient(config.SERVICE_BUS_FULLY_QUALIFIED_NAMESPACE, credential, transport_type=TransportType.AmqpOverWebsocket, retry_total=0)
         async with service_bus_client:
             receiver = service_bus_client.get_queue_receiver(queue_name=config.SERVICE_BUS_STEP_RESULT_QUEUE)
             async with receiver:

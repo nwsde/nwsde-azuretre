@@ -13,6 +13,7 @@ from service_bus.helpers import send_deployment_message, update_resource_for_ste
 from azure.servicebus import NEXT_AVAILABLE_SESSION
 from azure.servicebus.exceptions import OperationTimeoutError, ServiceBusConnectionError
 from azure.servicebus.aio import ServiceBusClient, AutoLockRenewer
+from azure.servicebus._common.constants import TransportType
 from db.repositories.operations import OperationRepository
 from core import config, credentials
 from db.errors import EntityDoesNotExist
@@ -40,7 +41,7 @@ class DeploymentStatusUpdater():
             while True:
                 try:
                     async with credentials.get_credential_async_context() as credential:
-                        service_bus_client = ServiceBusClient(config.SERVICE_BUS_FULLY_QUALIFIED_NAMESPACE, credential)
+                        service_bus_client = ServiceBusClient(config.SERVICE_BUS_FULLY_QUALIFIED_NAMESPACE, credential, transport_type=TransportType.AmqpOverWebsocket)
 
                         logger.info(f"Looking for new messages on {config.SERVICE_BUS_DEPLOYMENT_STATUS_UPDATE_QUEUE} queue...")
                         # max_wait_time=1 -> don't hold the session open after processing of the message has finished

@@ -2,6 +2,7 @@ import os
 import uuid
 
 from azure.servicebus import ServiceBusClient, ServiceBusMessage
+from azure.servicebus._common.constants import TransportType
 
 
 CREATE_WORKSPACE_REQUEST_DATA_FILE = "createWorkspaceRequestData.json"
@@ -12,7 +13,7 @@ def send_service_bus_message(service_bus_connection_string, service_bus_queue_na
         data = file.read().replace('\n', '')
 
     service_bus_client = ServiceBusClient.from_connection_string(
-        conn_str=service_bus_connection_string, logging_enable=True)
+        conn_str=service_bus_connection_string, logging_enable=True, transport_type=TransportType.AmqpOverWebsocket)
 
     with service_bus_client:
         queue_sender = service_bus_client.get_queue_sender(queue_name=service_bus_queue_name)
