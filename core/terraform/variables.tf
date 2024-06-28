@@ -183,7 +183,13 @@ variable "enable_airlock_email_check" {
 variable "firewall_sku" {
   description = "Azure Firewall SKU"
   type        = string
-  default     = ""
+  default     = "Standard"
+}
+
+variable "service_bus_sku" {
+  description = "Azure Service Bus SKU"
+  type = string
+  default = "Premium"
 }
 
 variable "rp_bundle_values" {
