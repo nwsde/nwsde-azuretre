@@ -40,7 +40,7 @@
 | `WORKSPACE_APP_SERVICE_PLAN_SKU` | Optional. The SKU used for AppService plan used in E2E tests unless otherwise specified. Default value is `P1v2`. |
 | `RESOURCE_PROCESSOR_NUMBER_PROCESSES_PER_INSTANCE` | Optional. The number of processes to instantiate when the Resource Processor starts. Equates to the number of parallel deployment operations possible in your TRE. Defaults to `5`. |
 | `FIREWALL_SKU` | Optional. The SKU of the Azure Firewall instance. Default value is `Standard`. Allowed values [`Basic`, `Standard`, `Premium`]. See [Azure Firewall SKU feature comparison](https://learn.microsoft.com/en-us/azure/firewall/choose-firewall-sku). |
-
+| `SERVICE_BUS_SKU` | Optional. The SKU of the Service Bus instance. Default value is `Premium`. Allowed values [`Standard`, `Premium`]. See [Service Bus premium messaging tier](https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-premium-messaging). Please note only the `Premium` SKU supports private endpoints. |
 
 ## For authentication in `/config.yaml`
 
