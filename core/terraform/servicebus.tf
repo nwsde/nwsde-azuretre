@@ -3,8 +3,8 @@ resource "azurerm_servicebus_namespace" "sb" {
   location                     = azurerm_resource_group.core.location
   resource_group_name          = azurerm_resource_group.core.name
   sku                          = var.service_bus_sku
-  premium_messaging_partitions = var.service_bus_sku == local.PREMIUM_SKU ? "1" : "0"
-  capacity                     = var.service_bus_sku == local.PREMIUM_SKU ? "1" : "0"
+  premium_messaging_partitions = var.service_bus_sku == local.PREMIUM_SKU ? "1" : "0"          // Premium SKU only
+  capacity                     = var.service_bus_sku == local.PREMIUM_SKU ? "1" : "0"          // Premium SKU only
   tags                         = local.tre_core_tags
 
   # Block public access
@@ -20,7 +20,7 @@ resource "azurerm_servicebus_namespace" "sb" {
     default_action                = "Allow"                                                     # SB SKU - TODO Change back to Deny once fw IP rule added
     public_network_access_enabled = true
 
-    dynamic "network_rules" {
+    dynamic "network_rules" {                                                                  // Premium SKU only
       for_each = var.service_bus_sku == local.PREMIUM_SKU ? [1] : []
       content {
         subnet_id                            = module.network.airlock_events_subnet_id
@@ -46,13 +46,13 @@ resource "azurerm_servicebus_queue" "service_bus_deployment_status_update_queue"
 
   # The returned payload might be large, especially for errors.
   # Cosmos is the final destination of the messages where 2048 is the limit.
-  max_message_size_in_kilobytes = var.service_bus_sku == local.PREMIUM_SKU ? 2048 : null # default=1024
+  max_message_size_in_kilobytes = var.service_bus_sku == local.PREMIUM_SKU ? 2048 : null    // Premium SKU only
 
   enable_partitioning = false
   requires_session    = true
 }
 
-resource "azurerm_private_dns_zone" "servicebus" {
+resource "azurerm_private_dns_zone" "servicebus" {                                          // Premium SKU only
   count = var.service_bus_sku == local.PREMIUM_SKU ? 1 : 0
 
   name                = module.terraform_azurerm_environment_configuration.private_links["privatelink.servicebus.windows.net"]
@@ -61,7 +61,7 @@ resource "azurerm_private_dns_zone" "servicebus" {
   lifecycle { ignore_changes = [tags] }
 }
 
-resource "azurerm_private_dns_zone_virtual_network_link" "servicebuslink" {
+resource "azurerm_private_dns_zone_virtual_network_link" "servicebuslink" {                 // Premium SKU only
   count = var.service_bus_sku == local.PREMIUM_SKU ? 1 : 0
 
   name                  = "servicebuslink"
@@ -73,7 +73,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "servicebuslink" {
   lifecycle { ignore_changes = [tags] }
 }
 
-resource "azurerm_private_endpoint" "sbpe" {
+resource "azurerm_private_endpoint" "sbpe" {                                                // Premium SKU only
   count = var.service_bus_sku == local.PREMIUM_SKU ? 1 : 0
 
   name                = "pe-${azurerm_servicebus_namespace.sb.name}"
