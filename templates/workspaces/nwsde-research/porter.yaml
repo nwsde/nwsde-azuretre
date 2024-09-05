@@ -1,7 +1,7 @@
 ---
 schemaVersion: 1.0.0
 name: tre-workspace-nwsde-research
-version: 1.8.5
+version: 1.9.0
 description: "A workspace for North West SDE Research"
 dockerfile: Dockerfile.tmpl
 registry: azuretre
