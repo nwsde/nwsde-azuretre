@@ -35,6 +35,11 @@ on:  # yamllint disable-line rule:truthy
         description: ""
         type: string
         required: true
+      ENABLE_E2E_TESTS:
+        description: Flag to enable/disable end-to-end tests. Enabled by default
+        type: boolean
+        default: true
+        required: false 
     secrets:
       AAD_TENANT_ID:
         description: ""
@@ -175,7 +180,7 @@ jobs:
           fi
 
       - name: Report check status start
-        if: inputs.prHeadSha != ''
+        if: ${{ inputs.ENABLE_E2E_TESTS && (inputs.prHeadSha != '') }}
         uses: LouisBrunner/checks-action@v2.0.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -726,6 +731,7 @@ jobs:
 
   e2e_tests_smoke:
     name: "Run E2E Tests (Smoke)"
+    if: ${{ inputs.ENABLE_E2E_TESTS }}
     runs-on: ubuntu-latest
     environment: ${{ inputs.environmentName }}
     needs: [deploy_shared_services, register_bundles, deploy_ui]
@@ -768,7 +774,7 @@ jobs:
 
   e2e_tests_custom:
     name: "Run E2E Tests"
-    if: ${{ inputs.e2eTestsCustomSelector != '' }}
+    if: ${{ inputs.ENABLE_E2E_TESTS && (inputs.e2eTestsCustomSelector != '') }}
     runs-on: ubuntu-latest
     environment: ${{ inputs.environmentName }}
     needs: [deploy_shared_services, register_bundles, register_user_resource_bundles]
@@ -817,7 +823,7 @@ jobs:
     permissions:
       checks: write
       contents: read
-    if: always()
+    if: ${{ inputs.ENABLE_E2E_TESTS && always() }}
     environment: ${{ inputs.environmentName }}
     steps:
       # - uses: technote-space/workflow-conclusion-action@v3 (removed due to archived repo and deprecated node.js version)
