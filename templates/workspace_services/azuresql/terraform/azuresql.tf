@@ -71,7 +71,7 @@ resource "azurerm_mssql_server_extended_auditing_policy" "azuresqlaudit" {
 
 resource "azurerm_monitor_diagnostic_setting" "azuresqldiagnosticsetting" {
   name                       = local.azuresql_server_diagnostic_setting_name
-  target_resource_id         = azurerm_mssql_server.azuresql.id
+  target_resource_id         = "${azurerm_mssql_server.azuresql.id}/databases/master"
   log_analytics_workspace_id = data.azurerm_log_analytics_workspace.la.id
 
   enabled_log {
