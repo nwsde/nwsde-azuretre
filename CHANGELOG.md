@@ -6,6 +6,7 @@
 FEATURES:
 
 ENHANCEMENTS:
+* Enable Azure SQL server and database auditing ([#TBC](https://github.com/microsoft/AzureTRE/issues/TBC))
 
 BUG FIXES:
 

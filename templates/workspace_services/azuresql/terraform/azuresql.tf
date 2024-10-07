@@ -63,3 +63,43 @@ resource "azurerm_key_vault_secret" "db_password" {
 
   lifecycle { ignore_changes = [tags] }
 }
+
+resource "azurerm_mssql_server_extended_auditing_policy" "azuresqlaudit" {
+  server_id = azurerm_mssql_server.azuresql.id
+  log_monitoring_enabled = true
+}
+
+resource "azurerm_monitor_diagnostic_setting" "azuresqldiagnosticsetting" {
+  name                       = local.azuresql_server_diagnostic_setting_name
+  target_resource_id         = azurerm_mssql_server.azuresql.id
+  log_analytics_workspace_id = data.azurerm_log_analytics_workspace.la.id
+
+  enabled_log {
+    category = "SQLSecurityAuditEvents"
+  }
+
+  metric {
+    category = "AllMetrics"
+    enabled = false
+  }
+}
+
+resource "azurerm_mssql_database_extended_auditing_policy" "azuresqldatabaseaudit" {
+  database_id = azurerm_mssql_database.azuresqldatabase.id
+  log_monitoring_enabled = true
+}
+
+resource "azurerm_monitor_diagnostic_setting" "azuresqldatabasediagnosticsetting" {
+  name                       = local.azuresql_database_diagnostic_setting_name
+  target_resource_id         = azurerm_mssql_database.azuresqldatabase.id
+  log_analytics_workspace_id = data.azurerm_log_analytics_workspace.la.id
+
+  enabled_log {
+    category = "SQLSecurityAuditEvents"
+  }
+
+  metric {
+    category = "AllMetrics"
+      enabled = false
+  }
+}

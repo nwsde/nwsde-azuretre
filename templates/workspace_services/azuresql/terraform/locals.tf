@@ -7,6 +7,7 @@ locals {
   workspace_resource_group_name  = "rg-${local.workspace_resource_name_suffix}"
   workspace_vnet_name            = "vnet-${local.workspace_resource_name_suffix}"
   workspace_keyvault_name        = lower("kv-${substr(local.workspace_resource_name_suffix, -20, -1)}")
+  workspace_log_analytics_name   = "log-${local.workspace_resource_name_suffix}"
 
   service_short_id             = substr(var.tre_resource_id, -4, -1)
   service_resource_name_suffix = "${local.workspace_resource_name_suffix}-svc-${local.service_short_id}"
@@ -26,6 +27,9 @@ locals {
   azuresql_private_endpoint_name           = "pe-${azurerm_mssql_server.azuresql.name}"
   azuresql_private_service_connection_name = "psc-${azurerm_mssql_server.azuresql.name}"
   azuresql_password_keyvault_secret_name   = "${azurerm_mssql_server.azuresql.name}-administrator-password"
+
+  azuresql_server_diagnostic_setting_name   = "ds-${local.azuresql_server_name}"
+  azuresql_database_diagnostic_setting_name = "ds-${local.azuresql_server_name}-${var.db_name}"
 
   workspace_service_tags = {
     tre_id                   = var.tre_id

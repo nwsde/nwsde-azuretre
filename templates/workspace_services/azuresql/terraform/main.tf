@@ -61,3 +61,8 @@ data "azurerm_private_dns_zone" "azuresql" {
   name                = module.terraform_azurerm_environment_configuration.private_links["privatelink.database.windows.net"]
   resource_group_name = local.core_resource_group_name
 }
+
+data "azurerm_log_analytics_workspace" "la" {
+  name                = local.workspace_log_analytics_name
+  resource_group_name = local.workspace_resource_group_name
+}
