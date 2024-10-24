@@ -1,0 +1,41 @@
+variable "location" {
+  type = string
+}
+
+variable "tre_id" {
+  type = string
+}
+
+variable "enable_local_debugging" {
+  type = bool
+}
+
+variable "arm_environment" {
+  type = string
+}
+
+variable "workspace_resource_group_name" {
+  type = string
+}
+
+variable "workspace_storage_account_name" {
+  type = string
+}
+
+variable "workspace_short_id" {
+  type = string
+}
+
+variable "storage_account_blob_private_endpoint_dependency" {
+  type = any
+}
+
+variable "storage_account_network_rules_dependency" {
+  type = any
+}
+
+variable "arm_use_msi" {
+  type = bool
+}
+
+
