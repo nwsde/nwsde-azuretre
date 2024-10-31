@@ -129,6 +129,10 @@ inputs:
     description: "Firewall SKU"
     required: false
     default: ""
+  TRE_URL:
+    description: "The URL of the TRE as registered in DNS, usually via a CNAME"
+    required: false
+    default: ""
 
 runs:
   using: composite
@@ -155,9 +159,13 @@ runs:
     - name: Construct TRE_URL
       shell: bash
       run: |
-        source devops/scripts/construct_tre_url.sh
-        tre_url=$(construct_tre_url "${{ inputs.TRE_ID }}" "${{ inputs.LOCATION }}" "${{ env.AZURE_ENVIRONMENT }}")
-        echo "TRE_URL=$tre_url" >> $GITHUB_ENV
+        if [ "${{ inputs.TRE_URL}}" == '' ]; then
+          source devops/scripts/construct_tre_url.sh
+          tre_url=$(construct_tre_url "${{ inputs.TRE_ID }}" "${{ inputs.LOCATION }}" "${{ env.AZURE_ENVIRONMENT }}")
+          echo "TRE_URL=$tre_url" >> $GITHUB_ENV
+        else
+          echo "TRE_URL=${{ inputs.TRE_URL }}" >> $GITHUB_ENV
+        fi
 
     - name: Construct ARM_ENVIRONMENT
       shell: bash
@@ -219,6 +227,7 @@ runs:
           -e TRE_ID="${{ inputs.TRE_ID }}" \
           -e TF_VAR_tre_id="${{ inputs.TRE_ID }}" \
           -e TRE_URL="${{ env.TRE_URL }}" \
+          -e TF_VAR_tre_url="${{ env.TRE_URL }}" \
           -e TEST_WORKSPACE_APP_ID="${{ inputs.TEST_WORKSPACE_APP_ID }}" \
           -e TEST_WORKSPACE_APP_SECRET="${{ inputs.TEST_WORKSPACE_APP_SECRET }}" \
           -e TEST_APP_ID="${{ inputs.TEST_APP_ID }}" \

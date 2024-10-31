@@ -169,6 +169,7 @@ module "resource_processor_vmss_porter" {
   logging_level                                    = var.logging_level
   firewall_sku                                     = var.firewall_sku
   rp_bundle_values                                 = var.rp_bundle_values
+  tre_url                                          = var.tre_url
 
   depends_on = [
     module.network,
