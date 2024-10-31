@@ -4,7 +4,7 @@ name: Deploy Azure TRE - skip e2e tests
 # It also runs on a schedule, serving as the nightly build
 
 on:  # yamllint disable-line rule:truthy
-# JR 29-11-2023  Disable push to repo and scheduled deployments (for now) 
+# JR 29-11-2023  Disable push to repo and scheduled deployments (for now)
 #  schedule:
 #    # midnight every day https://crontab.guru/#0_0_*_*_*
 #    - cron: "0 0 * * *"
@@ -25,7 +25,7 @@ concurrency: "${{ github.workflow }}-${{ github.ref }}"
 jobs:
   run-deploy-tre-main:
     name: "Deploy"
-# JR 29-11-2023  Disable main branch check - this is now controlled via GitHub environment protection rules (see Settings > Environments) 
+# JR 29-11-2023  Disable main branch check - this is now controlled via GitHub environment protection rules (see Settings > Environments)
 #    if: github.ref == 'refs/heads/main'
     uses: ./.github/workflows/deploy_tre_reusable.yml
     permissions:
@@ -40,7 +40,7 @@ jobs:
       environmentName: ${{ github.event.inputs.environment || 'CICD' }}
       E2E_TESTS_NUMBER_PROCESSES: 1
       DEVCONTAINER_TAG: 'latest'
-      ENABLE_E2E_TESTS: false 
+      ENABLE_E2E_TESTS: false
     secrets:
       AAD_TENANT_ID: ${{ secrets.AAD_TENANT_ID }}
       ACR_NAME: ${{ secrets.ACR_NAME }}
@@ -60,3 +60,4 @@ jobs:
       TEST_ACCOUNT_CLIENT_SECRET: "${{ secrets.TEST_ACCOUNT_CLIENT_SECRET }}"
       TRE_ID: ${{ secrets.TRE_ID }}
       CI_CACHE_ACR_NAME: ${{ secrets.ACR_NAME }}
+      TRE_URL: ${{ secrets.TRE_URL }}
