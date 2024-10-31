@@ -211,6 +211,7 @@ variable "logging_level" {
     condition     = contains(["INFO", "DEBUG", "WARNING", "ERROR"], var.logging_level)
     error_message = "logging_level must be one of ERROR, WARNING, INFO, DEBUG"
   }
+}
 
 variable "tre_url" {
   type    = string
