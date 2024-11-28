@@ -19,8 +19,8 @@ ln -s "$PORTER_HOME/porter" "$PORTER_HOME/runtimes/porter-runtime"
 echo "Installed $("${PORTER_HOME}"/porter version)"
 
 "${PORTER_HOME}/porter" mixin install exec --version "$PORTER_VERSION"
-"${PORTER_HOME}/porter" mixin install terraform --version "$PORTER_TERRAFORM_MIXIN_VERSION"
-"${PORTER_HOME}/porter" mixin install az --version "$PORTER_AZ_MIXIN_VERSION"
+"${PORTER_HOME}/porter" mixin install terraform --version v1.0.5-jonnyry --url https://github.com/jonnyry/terraform-mixin/releases/download/
+"${PORTER_HOME}/porter" mixin install az --version v1.0.4-jonnyry --url https://github.com/jonnyry/az-mixin/releases/download/
 
 "${PORTER_HOME}/porter" plugin install azure --version "$PORTER_AZURE_PLUGIN_VERSION"
 
