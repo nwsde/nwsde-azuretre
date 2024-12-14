@@ -137,18 +137,6 @@
       }
     },
     {
-      "name": "research_project_id",
-      "source": {
-        "env": "RESEARCH_PROJECT_ID"
-      }
-    },
-    {
-      "name": "data_engineering_ws_id",
-      "source": {
-        "env": "DATA_ENGINEERING_WS_ID"
-      }
-    },
-    {
       "name": "arm_environment",
       "source": {
         "env": "ARM_ENVIRONMENT"
@@ -158,6 +146,30 @@
       "name": "azure_environment",
       "source": {
         "env": "AZURE_ENVIRONMENT"
+      }
+    },
+    {
+      "name": "enable_cmk_encryption",
+      "source": {
+        "env": "enable_cmk_encryption"
+      }
+    },
+    {
+      "name": "key_store_id",
+      "source": {
+        "env": "key_store_id"
+      }
+    },
+    {
+      "name": "research_project_id",
+      "source": {
+        "env": "RESEARCH_PROJECT_ID"
+      }
+    },
+    {
+      "name": "data_engineering_ws_id",
+      "source": {
+        "env": "DATA_ENGINEERING_WS_ID"
       }
     }
   ]
