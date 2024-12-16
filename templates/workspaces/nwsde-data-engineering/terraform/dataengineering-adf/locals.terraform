@@ -1,0 +1,22 @@
+locals {
+
+  # resource names
+  #
+  adf_name = "adf-${var.tre_id}-dataeng-ws-${var.workspace_short_id}"
+  adf_integration_runtime_name = "integration-runtime-${local.adf_name}"
+  adf_managed_private_endpoint_source_storage_account_name = "managedpe-${var.tre_id}-${var.workspace_storage_account_name}"
+  adf_linked_service_source_storage_account_name = "linkedservice-${var.tre_id}-${var.workspace_storage_account_name}"
+
+  # container names
+  dataeng_input_storage_container = "adb-gold"
+  dataeng_output_storage_container = "adb-goldplus"
+
+  # tags
+  #
+  adf_tag_name_dataeng_output_storage_container_name = "nwsde-dataeng-output-storage-container-name"
+
+  # azure roles
+  #
+  azure_role_storage_blob_data_contributor = "Storage Blob Data Contributor"
+
+}
