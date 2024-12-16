@@ -36,6 +36,7 @@ resource "azurerm_data_factory_managed_private_endpoint" "adf_private_endpoint_d
   subresource_name = "file"
 
   depends_on = [
+    data.azurerm_data_factory.adf,
     data.azurerm_storage_account.destination_storage
   ]
 }
