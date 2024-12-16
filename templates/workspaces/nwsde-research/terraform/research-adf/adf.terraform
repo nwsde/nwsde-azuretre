@@ -96,6 +96,7 @@ resource "azurerm_data_factory_pipeline" "ws_pipeline" {
   })
 
   depends_on = [
+    data.azurerm_data_factory.adf,
     azurerm_data_factory_dataset_azure_blob.adf_dataset_source,
     azurerm_data_factory_dataset_binary.adf_dataset_destination
   ]
@@ -122,6 +123,7 @@ resource "azurerm_data_factory_trigger_blob_event" "ws_pipeline_trigger" {
   }
 
   depends_on = [
+    data.azurerm_data_factory.adf,
     azurerm_data_factory_pipeline.ws_pipeline
   ]
 }
