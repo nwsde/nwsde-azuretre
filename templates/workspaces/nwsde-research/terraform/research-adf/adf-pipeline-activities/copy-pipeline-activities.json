@@ -1,0 +1,50 @@
+[
+  {
+    "name": "${copy-activity-name}",
+    "description": "",
+    "type": "Copy",
+    "dependsOn": [],
+    "policy": {
+        "timeout": "7.00:00:00",
+        "retry": 0,
+        "retryIntervalInSeconds": 30,
+        "secureOutput": false,
+        "secureInput": false
+    },
+    "userProperties": [],
+    "typeProperties": {
+        "source": {
+            "type": "BlobSource",
+            "storeSettings": {
+                "type": "AzureBlobStorageReadSettings",
+                "recursive": true
+            }
+        },
+        "sink": {
+            "type": "FileSystemSink",
+            "storeSettings": {
+                "type": "AzureBlobStorageReadSettings"
+            }
+        },
+        "enableStaging": false
+    },
+    "inputs": [
+        {
+            "referenceName": "${dataset-source}",
+            "type": "DatasetReference",
+            "parameters": {
+                "FolderPath": "${dataset-source-path}"
+            }
+        }
+    ],
+    "outputs": [
+        {
+            "referenceName": "${dataset-dest}",
+            "type": "DatasetReference",
+            "parameters": {
+                "FolderPath": "${dataset-dest-path}"
+            }
+        }
+    ]
+  }
+]
