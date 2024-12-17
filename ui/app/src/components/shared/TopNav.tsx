@@ -3,6 +3,7 @@ import { getTheme, Icon, mergeStyles, Stack } from '@fluentui/react';
 import { Link } from 'react-router-dom';
 import { UserMenu } from './UserMenu';
 import { NotificationPanel } from './notifications/NotificationPanel';
+import config from '../../config.json';
 
 export const TopNav: React.FunctionComponent = () => {
   return (
@@ -12,7 +13,7 @@ export const TopNav: React.FunctionComponent = () => {
           <Stack.Item grow={100}>
             <Link to='/' className='tre-home-link'>
               <Icon iconName="TestBeakerSolid" style={{ marginLeft: '10px', marginRight: '10px', verticalAlign: 'middle' }} />
-              <h5 style={{display: 'inline'}}>Azure TRE</h5>
+              <h5 style={{display: 'inline'}}>{ (config.treProductName ?? "") === ""  ? "Azure TRE" : config.treProductName}</h5>
             </Link>
           </Stack.Item>
           <Stack.Item>
