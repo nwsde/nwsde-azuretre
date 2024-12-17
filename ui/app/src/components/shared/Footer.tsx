@@ -32,7 +32,7 @@ export const Footer: React.FunctionComponent = () => {
   return (
     <div className={contentClass}>
       <Stack horizontal style={{alignItems:'center'}}>
-        <StackItem grow={1}>Azure Trusted Research Environment</StackItem>
+        <StackItem grow={1}>{ (config.treFooterText ?? "") === ""  ? "Azure Trusted Research Environment" : config.treFooterText }</StackItem>
         <StackItem>
           <IconButton
             styles={iconButtonStyles}
