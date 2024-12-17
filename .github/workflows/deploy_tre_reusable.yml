@@ -95,6 +95,12 @@ on:  # yamllint disable-line rule:truthy
       AZURE_CREDENTIALS:
         description: ""
         required: true
+      TRE_PRODUCT_NAME:
+        description: ""
+        required: false
+      TRE_FOOTER_TEXT:
+        description: ""
+        required: false
 
 # This will prevent multiple runs of this entire workflow.
 # We should NOT cancel in progress runs as that can destabilize the environment.
@@ -725,6 +731,8 @@ jobs:
           MGMT_RESOURCE_GROUP_NAME: ${{ secrets.MGMT_RESOURCE_GROUP_NAME }}
           MGMT_STORAGE_ACCOUNT_NAME: ${{ secrets.MGMT_STORAGE_ACCOUNT_NAME }}
           SWAGGER_UI_CLIENT_ID: "${{ secrets.SWAGGER_UI_CLIENT_ID }}"
+          TRE_PRODUCT_NAME: "${{ vars.TRE_PRODUCT_NAME }}"
+          TRE_FOOTER_TEXT: "${{ vars.TRE_FOOTER_TEXT }}"
 
   e2e_tests_smoke:
     name: "Run E2E Tests (Smoke)"

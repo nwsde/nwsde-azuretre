@@ -7,5 +7,7 @@
     "treId": "my-tre",
     "debug": false,
     "version": "0.0.0",
-    "activeDirectoryUri": ""
+    "activeDirectoryUri": "",
+    "treProductName": "Azure TRE",
+    "treFooterText": "Azure Trusted Research Environment"
 }
