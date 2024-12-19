@@ -18,7 +18,8 @@
         "enum": [
           "Windows 10",
           "Windows 11",
-          "Server 2019 Data Science VM"
+          "Server 2019 Data Science VM",
+          "North West SDE Windows 11 Data Science"
         ]
       },
       "vm_size": {
