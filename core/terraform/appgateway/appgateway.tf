@@ -222,13 +222,32 @@ resource "azurerm_web_application_firewall_policy" "waf" {
 
   managed_rules {
     managed_rule_set {
-      type    = "OWASP"
-      version = 3.2
+      type    = "Microsoft_DefaultRuleSet"
+      version = "2.1"
+    }
+    managed_rule_set {
+      type    = "Microsoft_BotManagerRuleSet"
+      version = "1.0"
     }
   }
 
-  // once created ignore policy_settings and rulesets allow to be managed outside of here
-  lifecycle { ignore_changes = [policy_settings, managed_rules] }
+  custom_rules {
+    name      = "UKONLY"
+    priority  = 1
+    rule_type = "MatchRule"
+
+    match_conditions {
+      match_variables {
+        variable_name = "RemoteAddr"
+      }
+
+      operator           = "GeoMatch"
+      negation_condition = true
+      match_values       = ["GB"]
+    }
+
+    action = "Block"
+  }
 
   // terraform doesn't handle the downgrade from WAF_v2 > Standard_v2 SKU, this is required to detatch the policy from the app gateway before deletion of the policy
   provisioner "local-exec" {
