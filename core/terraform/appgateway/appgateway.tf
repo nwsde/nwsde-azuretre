@@ -217,18 +217,88 @@ resource "azurerm_web_application_firewall_policy" "waf" {
 
   policy_settings {
     enabled = true
-    mode    = "Detection"
+    mode    = "Prevention"
   }
 
   managed_rules {
     managed_rule_set {
-      type    = "OWASP"
-      version = 3.2
+      type    = "Microsoft_DefaultRuleSet"
+      version = "2.1"
+    }
+    managed_rule_set {
+      type    = "Microsoft_BotManagerRuleSet"
+      version = "1.0"
+      rule_group_override {
+        rule_group_name = "GoodBots"
+        rule {
+          id = "200100"
+          enabled = "true"
+          action = "Block"
+        }
+        rule {
+          id = "200200"
+          enabled = "true"
+          action = "Block"
+        }
+      }
+      rule_group_override {
+        rule_group_name = "UnknownBots"
+        rule {
+          id = "300100"
+          enabled = "true"
+          action = "Block"
+        }
+        rule {
+          id = "300200"
+          enabled = "true"
+          action = "Block"
+        }
+        rule {
+          id = "300300"
+          enabled = "true"
+          action = "Block"
+        }
+        rule {
+          id = "300400"
+          enabled = "true"
+          action = "Block"
+        }
+        rule {
+          id = "300500"
+          enabled = "true"
+          action = "Block"
+        }
+        rule {
+          id = "300600"
+          enabled = "true"
+          action = "Block"
+        }
+        rule {
+          id = "300700"
+          enabled = "true"
+          action = "Block"
+        }
+      }
     }
   }
 
-  // once created ignore policy_settings and rulesets allow to be managed outside of here
-  lifecycle { ignore_changes = [policy_settings, managed_rules] }
+  custom_rules {
+    name      = "UKONLY"
+    priority  = 1
+    rule_type = "MatchRule"
+
+    match_conditions {
+      match_variables {
+        variable_name = "RemoteAddr"
+      }
+
+      operator           = "GeoMatch"
+      negation_condition = true
+      match_values       = ["GB"]
+    }
+
+    action = "Block"
+  }
 
   // terraform doesn't handle the downgrade from WAF_v2 > Standard_v2 SKU, this is required to detatch the policy from the app gateway before deletion of the policy
   provisioner "local-exec" {
