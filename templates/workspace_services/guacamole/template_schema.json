@@ -65,6 +65,32 @@
       "updateable": true,
       "default": true
     },
+    "guac_keyboard_layout": {
+      "$id": "#/properties/guac_keyboard_layout",
+      "type": "string",
+      "title": "Keyboard layout",
+      "description": "The default keyboard layout",
+      "updateable": true,
+      "default": "English (American)",
+      "enum": [
+        "Brazilian (Portuguese)",
+        "English (British)",
+        "English (American)",
+        "French",
+        "French (Belgian)",
+        "French (Swiss)",
+        "German",
+        "German (Swiss)",
+        "Hungarian",
+        "Italian",
+        "Japanese",
+        "Norwegian",
+        "Spanish",
+        "Spanish (Latin American)",
+        "Swedish",
+        "Turkish-Q"
+      ]
+    },
     "is_exposed_externally": {
       "$id": "#/properties/is_exposed_externally",
       "type": "boolean",

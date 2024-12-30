@@ -111,7 +111,12 @@ public class ConnectionService {
         config.setParameter("drive-path", System.getenv("GUAC_DRIVE_PATH"));
         config.setParameter("disable-download", System.getenv("GUAC_DISABLE_DOWNLOAD"));
         config.setParameter("disable-upload", System.getenv("GUAC_DISABLE_UPLOAD"));
-        config.setParameter("server-layout", "en-gb-qwerty");
+
+        String keyboardLayout = System.getenv("GUAC_KEYBOARD_LAYOUT");
+
+        if (keyboardLayout != null)
+          if (!keyboardLayout.isEmpty())
+            config.setParameter("server-layout", keyboardLayout);
     }
 
     private static JSONArray getVMsFromProjectAPI(final AzureTREAuthenticatedUser user) throws GuacamoleException {

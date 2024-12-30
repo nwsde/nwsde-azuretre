@@ -75,6 +75,10 @@ parameters:
     type: boolean
     default: true
     env: GUAC_DISABLE_UPLOAD
+  - name: guac_keyboard_layout
+    type: string
+    default: ""
+    env: GUAC_KEYBOARD_LAYOUT
   - name: is_exposed_externally
     type: boolean
     default: true
@@ -144,6 +148,7 @@ install:
         guac_drive_path: ${ bundle.parameters.guac_drive_path }
         guac_disable_download: ${ bundle.parameters.guac_disable_download }
         guac_disable_upload: ${ bundle.parameters.guac_disable_upload }
+        guac_keyboard_layout: ${ bundle.parameters.guac_keyboard_layout }
         is_exposed_externally: ${ bundle.parameters.is_exposed_externally }
         tre_resource_id: ${ bundle.parameters.id }
         aad_authority_url: ${ bundle.parameters.aad_authority_url }
@@ -177,6 +182,7 @@ upgrade:
         guac_drive_path: ${ bundle.parameters.guac_drive_path }
         guac_disable_download: ${ bundle.parameters.guac_disable_download }
         guac_disable_upload: ${ bundle.parameters.guac_disable_upload }
+        guac_keyboard_layout: ${ bundle.parameters.guac_keyboard_layout }
         is_exposed_externally: ${ bundle.parameters.is_exposed_externally }
         tre_resource_id: ${ bundle.parameters.id }
         aad_authority_url: ${ bundle.parameters.aad_authority_url }
@@ -210,6 +216,7 @@ uninstall:
         guac_drive_path: ${ bundle.parameters.guac_drive_path }
         guac_disable_download: ${ bundle.parameters.guac_disable_download }
         guac_disable_upload: ${ bundle.parameters.guac_disable_upload }
+        guac_keyboard_layout: ${ bundle.parameters.guac_keyboard_layout }
         is_exposed_externally: ${ bundle.parameters.is_exposed_externally }
         tre_resource_id: ${ bundle.parameters.id }
         aad_authority_url: ${ bundle.parameters.aad_authority_url }

@@ -95,6 +95,12 @@
       }
     },
     {
+      "name": "guac_keyboard_layout",
+      "source": {
+        "env": "GUAC_KEYBOARD_LAYOUT"
+      }
+    },
+    {
       "name": "image_tag",
       "source": {
         "env": "IMAGE_TAG"

@@ -23,4 +23,22 @@ locals {
     "AppServiceHTTPLogs", "AppServiceConsoleLogs", "AppServiceAppLogs",
     "AppServiceAuditLogs", "AppServiceIPSecAuditLogs", "AppServicePlatformLogs", "AppServiceAntivirusScanAuditLogs"
   ]
+  guac_keyboard_layouts = {
+    "Brazilian (Portuguese)"   = "pt-br-qwerty"
+    "English (British)"        = "en-gb-qwerty"
+    "English (American)"       = "en-us-qwerty"
+    "French"                   = "fr-fr-azerty"
+    "French (Belgian)"         = "fr-be-azerty"
+    "French (Swiss)"           = "fr-ch-qwertz"
+    "German"                   = "de-de-qwertz"
+    "German (Swiss)"           = "de-ch-qwertz"
+    "Hungarian"                = "hu-hu-qwertz"
+    "Italian"                  = "it-it-qwerty"
+    "Japanese"                 = "ja-jp-qwerty"
+    "Norwegian"                = "no-no-qwerty"
+    "Spanish"                  = "es-es-qwerty"
+    "Spanish (Latin American)" = "es-latam-qwerty"
+    "Swedish"                  = "sv-se-qwerty"
+    "Turkish-Q"                = "tr-tr-qwerty"
+  }
 }
