@@ -122,6 +122,10 @@ parameters:
   - name: key_store_id
     type: string
     default: ""
+  - name: storage_account_redundancy
+    type: string
+    default: "GRS"
+    description: "The redundancy option for the storage account in the workspace: GRS (Geo-Redundant Storage) or ZRS (Zone-Redundant Storage)."
   - name: research_project_id
     type: string
   - name: data_engineering_ws_id
@@ -195,6 +199,7 @@ install:
         arm_environment: ${ bundle.parameters.arm_environment }
         enable_cmk_encryption: ${ bundle.parameters.enable_cmk_encryption }
         key_store_id: ${ bundle.parameters.key_store_id }
+        storage_account_redundancy: ${ bundle.parameters.storage_account_redundancy }
         research_project_id: ${ bundle.parameters.research_project_id }
         data_engineering_ws_id: ${ bundle.parameters.data_engineering_ws_id }
         arm_use_msi: ${ bundle.parameters.arm_use_msi }
@@ -242,6 +247,7 @@ upgrade:
         arm_environment: ${ bundle.parameters.arm_environment }
         enable_cmk_encryption: ${ bundle.parameters.enable_cmk_encryption }
         key_store_id: ${ bundle.parameters.key_store_id }
+        storage_account_redundancy: ${ bundle.parameters.storage_account_redundancy }
         research_project_id: ${ bundle.parameters.research_project_id }
         data_engineering_ws_id: ${ bundle.parameters.data_engineering_ws_id }
         arm_use_msi: ${ bundle.parameters.arm_use_msi }
@@ -312,6 +318,7 @@ uninstall:
         arm_environment: ${ bundle.parameters.arm_environment }
         enable_cmk_encryption: ${ bundle.parameters.enable_cmk_encryption }
         key_store_id: ${ bundle.parameters.key_store_id }
+        storage_account_redundancy: ${ bundle.parameters.storage_account_redundancy }
         research_project_id: ${ bundle.parameters.research_project_id }
         data_engineering_ws_id: ${ bundle.parameters.data_engineering_ws_id }
         arm_use_msi: ${ bundle.parameters.arm_use_msi }
