@@ -420,6 +420,8 @@ jobs:
              BUNDLE_DIR: "./templates/workspaces/nwsde-data-engineering"}
           - {BUNDLE_TYPE: "workspace",
              BUNDLE_DIR: "./templates/workspaces/nwsde-research"}
+          - {BUNDLE_TYPE: "user_resource",
+             BUNDLE_DIR: "./templates/workspace_services/guacamole/user_resources/guacamole-azure-windowsvm-nwsde"}
 # End
     environment: ${{ inputs.environmentName }}
     steps:
@@ -615,18 +617,25 @@ jobs:
     strategy:
       matrix:
         include:
-          - {BUNDLE_TYPE: "user_resource",
-             BUNDLE_DIR: "./templates/workspace_services/guacamole/user_resources/guacamole-azure-windowsvm",
-             WORKSPACE_SERVICE_NAME: "tre-service-guacamole"}
-          - {BUNDLE_TYPE: "user_resource",
-             BUNDLE_DIR: "./templates/workspace_services/guacamole/user_resources/guacamole-azure-linuxvm",
-             WORKSPACE_SERVICE_NAME: "tre-service-guacamole"}
+# JR Don't register superseded bundles
+#          - {BUNDLE_TYPE: "user_resource",
+#             BUNDLE_DIR: "./templates/workspace_services/guacamole/user_resources/guacamole-azure-windowsvm",
+#             WORKSPACE_SERVICE_NAME: "tre-service-guacamole"}
+#          - {BUNDLE_TYPE: "user_resource",
+#             BUNDLE_DIR: "./templates/workspace_services/guacamole/user_resources/guacamole-azure-linuxvm",
+#             WORKSPACE_SERVICE_NAME: "tre-service-guacamole"}
+# End
           - {BUNDLE_TYPE: "user_resource",
              BUNDLE_DIR: "./templates/workspace_services/guacamole/user_resources/guacamole-azure-export-reviewvm",
              WORKSPACE_SERVICE_NAME: "tre-service-guacamole"}
           - {BUNDLE_TYPE: "user_resource",
              BUNDLE_DIR: "./templates/workspace_services/guacamole/user_resources/guacamole-azure-import-reviewvm",
              WORKSPACE_SERVICE_NAME: "tre-service-guacamole"}
+# JR Add North West SDE custom bundles
+          - {BUNDLE_TYPE: "user_resource",
+             BUNDLE_DIR: "./templates/workspace_services/guacamole/user_resources/guacamole-azure-windowsvm-nwsde",
+             WORKSPACE_SERVICE_NAME: "tre-service-guacamole"}
+# End
     environment: ${{ inputs.environmentName }}
     steps:
       - name: Checkout
