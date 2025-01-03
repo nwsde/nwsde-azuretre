@@ -1,0 +1,13 @@
+####################################################################################
+# override the base azuresql.tf file
+#
+# - contents of this file are additive to the base file
+# - they will not validate in vscode are they are only fragments of valid resources
+#
+####################################################################################
+
+resource "azurerm_mssql_server" "azuresql" {
+ identity {
+    type = "SystemAssigned"
+  }
+}
