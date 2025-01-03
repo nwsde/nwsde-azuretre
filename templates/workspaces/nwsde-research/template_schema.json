@@ -293,7 +293,6 @@
   ],
   "actions": [],
   "customActions": [],
-  "pipeline": null,
   "uiSchema": {
     "aad_redirect_uris": {
       "classNames": "tre-hidden"
@@ -320,6 +319,181 @@
       "configure_review_vms",
       "airlock_review_config",
       "*"
+    ]
+  },
+  "pipeline": {
+    "install": [
+      {
+        "stepId": "main"
+      },
+      {
+        "stepId": "94242857-8d27-4d21-8272-a91c1d0bc6fa",
+        "stepTitle": "Add firewall rules to enable windows activation and windows update",
+        "resourceTemplateName": "tre-shared-service-firewall",
+        "resourceType": "shared-service",
+        "resourceAction": "upgrade",
+        "properties": [
+          {
+            "name": "network_rule_collections",
+            "type": "array",
+            "arraySubstitutionAction": "replace",
+            "arrayMatchField": "name",
+            "value": {
+              "name": "nrc_workspace_{{ resource.id }}",
+              "action": "Allow",
+              "rules": [
+                {
+                  "name": "windows-activation",
+                  "description": "Windows Activation",
+                  "source_addresses": [
+                    "{{ resource.properties.address_space }}"
+                  ],
+                  "destination_addresses": [
+                    "20.118.99.224",
+                    "40.83.235.53"
+                  ],
+                  "destination_ports": [
+                    "1688"
+                  ],
+                  "protocols": [
+                    "TCP"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "name": "rule_collections",
+            "type": "array",
+            "arraySubstitutionAction": "replace",
+            "arrayMatchField": "name",
+            "value": {
+              "name": "arc_workspace_{{ resource.id }}",
+              "action": "Allow",
+              "rules": [
+                {
+                  "name": "windows-update",
+                  "description": "Windows Update",
+                  "protocols": [
+                    {
+                      "port": "443",
+                      "type": "Https"
+                    },
+                    {
+                      "port": "80",
+                      "type": "Http"
+                    }
+                  ],
+                  "fqdn_tags": [
+                    "WindowsUpdate"
+                  ],
+                  "source_addresses": [
+                    "{{ resource.properties.address_space }}"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "upgrade": [
+      {
+        "stepId": "main"
+      },
+      {
+        "stepId": "9bc48c59-ba5d-44f4-a1dd-61094ffa4d90",
+        "stepTitle": "Upgrade firewall rules to enable windows activation and windows update",
+        "resourceTemplateName": "tre-shared-service-firewall",
+        "resourceType": "shared-service",
+        "resourceAction": "upgrade",
+        "properties": [
+          {
+            "name": "network_rule_collections",
+            "type": "array",
+            "arraySubstitutionAction": "replace",
+            "arrayMatchField": "name",
+            "value": {
+              "name": "nrc_workspace_{{ resource.id }}",
+              "action": "Allow",
+              "rules": [
+                {
+                  "name": "windows-activation",
+                  "description": "Windows Activation",
+                  "source_addresses": [
+                    "{{ resource.properties.address_space }}"
+                  ],
+                  "destination_addresses": [
+                    "20.118.99.224",
+                    "40.83.235.53"
+                  ],
+                  "destination_ports": [
+                    "1688"
+                  ],
+                  "protocols": [
+                    "TCP"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "name": "rule_collections",
+            "type": "array",
+            "arraySubstitutionAction": "replace",
+            "arrayMatchField": "name",
+            "value": {
+              "name": "arc_workspace_{{ resource.id }}",
+              "action": "Allow",
+              "rules": [
+                {
+                  "name": "windows-update",
+                  "description": "Windows Update",
+                  "protocols": [
+                    {
+                      "port": "443",
+                      "type": "Https"
+                    },
+                    {
+                      "port": "80",
+                      "type": "Http"
+                    }
+                  ],
+                  "fqdn_tags": [
+                    "WindowsUpdate"
+                  ],
+                  "source_addresses": [
+                    "{{ resource.properties.address_space }}"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "uninstall": [
+      {
+        "stepId": "cec4e87f-4f14-43f7-bcc9-1aed3a09e315",
+        "stepTitle": "Remove workspace firewall rules",
+        "resourceTemplateName": "tre-shared-service-firewall",
+        "resourceType": "shared-service",
+        "resourceAction": "upgrade",
+        "properties": [
+          {
+            "name": "application_rule_collections",
+            "type": "array",
+            "arraySubstitutionAction": "remove",
+            "arrayMatchField": "name",
+            "value": {
+              "name": "arc_workspace_{{ resource.id }}"
+            }
+          }
+        ]
+      },
+      {
+        "stepId": "main"
+      }
     ]
   }
 }
