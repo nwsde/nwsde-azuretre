@@ -1,0 +1,58 @@
+name: NWSDE - Destroy Test Environment
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to destroy'
+        required: true
+        type: environment
+        default: CICD
+      confirm_destroy:
+        description: 'Type DESTROY to confirm'
+        required: true
+        type: string
+      confirm_environment:
+        description: 'Re-type the environment name to confirm'
+        required: true
+        type: string
+
+
+jobs:
+  destroy-environment:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+
+    steps:
+      - name: Check environment restrictions
+        if: |
+          github.event.inputs.environment == 'PROD' ||
+          github.event.inputs.environment == 'STAGE'
+        run: |
+          echo "Error: Cannot destroy PROD or STAGE environments"
+          exit 1
+
+      - name: Validate environment name match
+        if: github.event.inputs.environment != github.event.inputs.confirm_environment
+        run: |
+          echo "Error: Environment name confirmation does not match"
+          exit 1
+
+      - name: Validate destroy confirmation
+        if: github.event.inputs.confirm_destroy != 'DESTROY'
+        run: |
+          echo "Error: Must type DESTROY to confirm"
+          exit 1
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          environment: ${{ (vars.AZURE_ENVIRONMENT != '' && vars.AZURE_ENVIRONMENT) || 'AzureCloud' }}
+
+      - name: Run destroy script
+        run: |
+          devops/scripts/destroy_env_no_terraform.sh --core-tre-rg "rg-${{ secrets.TRE_ID }}"
