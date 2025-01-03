@@ -39,7 +39,7 @@ on:  # yamllint disable-line rule:truthy
         description: Flag to enable/disable end-to-end tests. Enabled by default
         type: boolean
         default: true
-        required: false 
+        required: false
     secrets:
       AAD_TENANT_ID:
         description: ""
@@ -415,6 +415,10 @@ jobs:
              BUNDLE_DIR: "./templates/workspace_services/guacamole/user_resources/guacamole-azure-export-reviewvm"}
           - {BUNDLE_TYPE: "user_resource",
              BUNDLE_DIR: "./templates/workspace_services/guacamole/user_resources/guacamole-azure-import-reviewvm"}
+# JR Add North West SDE custom bundles
+          - {BUNDLE_TYPE: "workspace_service",
+             BUNDLE_DIR: "./templates/workspace_services/azuresql-nwsde"}
+# End
     environment: ${{ inputs.environmentName }}
     steps:
       - name: Checkout
@@ -564,9 +568,14 @@ jobs:
              BUNDLE_DIR: "./templates/workspace_services/databricks"}
           - {BUNDLE_TYPE: "workspace_service",
              BUNDLE_DIR: "./templates/workspace_services/ohdsi"}
+# JR Don't register superseded bundles
+#          - {BUNDLE_TYPE: "workspace_service",
+#             BUNDLE_DIR: "./templates/workspace_services/azuresql"}
+# End
+# JR Add North West SDE custom bundles
           - {BUNDLE_TYPE: "workspace_service",
-             BUNDLE_DIR: "./templates/workspace_services/azuresql"}
-
+             BUNDLE_DIR: "./templates/workspace_services/azuresql-nwsde"}
+# End
     environment: ${{ inputs.environmentName }}
     steps:
       - name: Checkout
