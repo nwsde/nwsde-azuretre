@@ -26,6 +26,7 @@ COPY ./terraform/dataengineering-adf/providers.terraform "${BUNDLE_DIR}"/terrafo
 COPY ./terraform/dataengineering-adf/storage.terraform "${BUNDLE_DIR}"/terraform/dataengineering-adf/storage.tf
 COPY ./terraform/dataengineering-adf/variables.terraform "${BUNDLE_DIR}"/terraform/dataengineering-adf/variables.tf
 COPY ./terraform/network/security-nwsde.terraform "${BUNDLE_DIR}"/terraform/network/security-nwsde.tf
+COPY ./terraform/aad/aad_override.terraform "${BUNDLE_DIR}"/terraform/aad/aad_override.tf
 
 # PORTER_MIXINS
 
