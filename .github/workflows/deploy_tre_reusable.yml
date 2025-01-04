@@ -39,7 +39,7 @@ on:  # yamllint disable-line rule:truthy
         description: Flag to enable/disable end-to-end tests. Enabled by default
         type: boolean
         default: true
-        required: false 
+        required: false
     secrets:
       AAD_TENANT_ID:
         description: ""
@@ -415,6 +415,16 @@ jobs:
              BUNDLE_DIR: "./templates/workspace_services/guacamole/user_resources/guacamole-azure-export-reviewvm"}
           - {BUNDLE_TYPE: "user_resource",
              BUNDLE_DIR: "./templates/workspace_services/guacamole/user_resources/guacamole-azure-import-reviewvm"}
+# JR Add North West SDE custom bundles
+          - {BUNDLE_TYPE: "workspace",
+             BUNDLE_DIR: "./templates/workspaces/nwsde-data-engineering"}
+          - {BUNDLE_TYPE: "workspace",
+             BUNDLE_DIR: "./templates/workspaces/nwsde-research"}
+          - {BUNDLE_TYPE: "workspace_service",
+             BUNDLE_DIR: "./templates/workspace_services/azuresql-nwsde"}
+          - {BUNDLE_TYPE: "user_resource",
+             BUNDLE_DIR: "./templates/workspace_services/guacamole/user_resources/guacamole-azure-windowsvm-nwsde"}
+# End
     environment: ${{ inputs.environmentName }}
     steps:
       - name: Checkout
@@ -544,10 +554,12 @@ jobs:
       matrix:
         include:
           # bundles type can be inferred from the bundle dir (but this is more explicit)
-          - {BUNDLE_TYPE: "workspace",
-             BUNDLE_DIR: "./templates/workspaces/base"}
-          - {BUNDLE_TYPE: "workspace",
-             BUNDLE_DIR: "./templates/workspaces/unrestricted"}
+# JR Don't register superseded bundles
+#          - {BUNDLE_TYPE: "workspace",
+#             BUNDLE_DIR: "./templates/workspaces/base"}
+#          - {BUNDLE_TYPE: "workspace",
+#             BUNDLE_DIR: "./templates/workspaces/unrestricted"}
+# End
           - {BUNDLE_TYPE: "workspace",
              BUNDLE_DIR: "./templates/workspaces/airlock-import-review"}
           - {BUNDLE_TYPE: "workspace_service",
@@ -564,9 +576,18 @@ jobs:
              BUNDLE_DIR: "./templates/workspace_services/databricks"}
           - {BUNDLE_TYPE: "workspace_service",
              BUNDLE_DIR: "./templates/workspace_services/ohdsi"}
+# JR Don't register superseded bundles
+#          - {BUNDLE_TYPE: "workspace_service",
+#             BUNDLE_DIR: "./templates/workspace_services/azuresql"}
+# End
+# JR Add North West SDE custom bundles
+          - {BUNDLE_TYPE: "workspace",
+             BUNDLE_DIR: "./templates/workspaces/nwsde-data-engineering"}
+          - {BUNDLE_TYPE: "workspace",
+             BUNDLE_DIR: "./templates/workspaces/nwsde-research"}
           - {BUNDLE_TYPE: "workspace_service",
-             BUNDLE_DIR: "./templates/workspace_services/azuresql"}
-
+             BUNDLE_DIR: "./templates/workspace_services/azuresql-nwsde"}
+# End
     environment: ${{ inputs.environmentName }}
     steps:
       - name: Checkout
@@ -604,18 +625,25 @@ jobs:
     strategy:
       matrix:
         include:
-          - {BUNDLE_TYPE: "user_resource",
-             BUNDLE_DIR: "./templates/workspace_services/guacamole/user_resources/guacamole-azure-windowsvm",
-             WORKSPACE_SERVICE_NAME: "tre-service-guacamole"}
-          - {BUNDLE_TYPE: "user_resource",
-             BUNDLE_DIR: "./templates/workspace_services/guacamole/user_resources/guacamole-azure-linuxvm",
-             WORKSPACE_SERVICE_NAME: "tre-service-guacamole"}
+# JR Don't register superseded bundles
+#          - {BUNDLE_TYPE: "user_resource",
+#             BUNDLE_DIR: "./templates/workspace_services/guacamole/user_resources/guacamole-azure-windowsvm",
+#             WORKSPACE_SERVICE_NAME: "tre-service-guacamole"}
+#          - {BUNDLE_TYPE: "user_resource",
+#             BUNDLE_DIR: "./templates/workspace_services/guacamole/user_resources/guacamole-azure-linuxvm",
+#             WORKSPACE_SERVICE_NAME: "tre-service-guacamole"}
+# End
           - {BUNDLE_TYPE: "user_resource",
              BUNDLE_DIR: "./templates/workspace_services/guacamole/user_resources/guacamole-azure-export-reviewvm",
              WORKSPACE_SERVICE_NAME: "tre-service-guacamole"}
           - {BUNDLE_TYPE: "user_resource",
              BUNDLE_DIR: "./templates/workspace_services/guacamole/user_resources/guacamole-azure-import-reviewvm",
              WORKSPACE_SERVICE_NAME: "tre-service-guacamole"}
+# JR Add North West SDE custom bundles
+          - {BUNDLE_TYPE: "user_resource",
+             BUNDLE_DIR: "./templates/workspace_services/guacamole/user_resources/guacamole-azure-windowsvm-nwsde",
+             WORKSPACE_SERVICE_NAME: "tre-service-guacamole"}
+# End
     environment: ${{ inputs.environmentName }}
     steps:
       - name: Checkout
