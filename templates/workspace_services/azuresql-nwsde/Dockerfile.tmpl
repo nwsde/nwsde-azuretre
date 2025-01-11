@@ -1,0 +1,36 @@
+# syntax=docker/dockerfile-upstream:1.4.0
+FROM --platform=linux/amd64 debian:bookworm-slim
+
+# PORTER_INIT
+
+RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
+
+# git
+#
+RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/apt apt-get update \
+    && apt-get install -y git --no-install-recommends
+
+# sqlcmd
+#
+RUN apt-get update \
+  && apt-get install -y curl gnupg \
+  && curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
+  && echo 'deb https://packages.microsoft.com/debian/11/prod bullseye main'> /etc/apt/sources.list.d/prod.list \
+  && apt-get update \
+  && apt-get -y install sqlcmd --no-install-recommends \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+
+# nslookup
+#
+RUN apt-get update && \
+apt-get install -y dnsutils && \
+rm -rf /var/lib/apt/lists/*
+
+
+WORKDIR ${BUNDLE_DIR}
+
+# PORTER_MIXINS
+
+# Use the BUNDLE_DIR build argument to copy files into the bundle
+COPY --link . ${BUNDLE_DIR}/
