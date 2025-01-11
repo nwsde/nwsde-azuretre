@@ -77,7 +77,7 @@ parameters:
     env: GUAC_DISABLE_UPLOAD
   - name: guac_server_layout
     type: string
-    default: ""
+    default: "en-gb-qwerty"
     env: GUAC_SERVER_LAYOUT
     description: "Guacamole server keyboard layout  (defaults to en-us-qwerty when not set)"
   - name: is_exposed_externally
