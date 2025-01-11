@@ -1,0 +1,49 @@
+# syntax=docker/dockerfile-upstream:1.4.0
+FROM --platform=linux/amd64 debian:bookworm-slim
+
+# PORTER_INIT
+
+RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
+
+# git
+#
+RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/apt apt-get update \
+    && apt-get install -y git --no-install-recommends
+
+# wget
+#
+RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/apt apt-get update \
+    && apt-get install -y wget
+
+# bzip2
+#
+RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/apt apt-get update \
+    && apt-get install -y bzip2
+
+# sqlcmd
+#
+ARG SQLCMD_VERSION=1.8.2
+ARG SQLCMD_ZIP=sqlcmd-linux-amd64.tar.bz2
+ARG SQLCMD_URL=https://github.com/microsoft/go-sqlcmd/releases/download/v"${SQLCMD_VERSION}"/"${SQLCMD_ZIP}"
+
+RUN mkdir sqltmp \
+    && cd sqltmp \
+    && wget "${SQLCMD_URL}" \
+    && tar -xvf "${SQLCMD_ZIP}" \
+    && mv sqlcmd /usr/local/bin/ \
+    && cd .. \
+    && rm -rf sqltmp
+
+# nslookup
+#
+RUN apt-get update && \
+apt-get install -y dnsutils && \
+rm -rf /var/lib/apt/lists/*
+
+
+WORKDIR ${BUNDLE_DIR}
+
+# PORTER_MIXINS
+
+# Use the BUNDLE_DIR build argument to copy files into the bundle
+COPY --link . ${BUNDLE_DIR}/
