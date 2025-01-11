@@ -1,0 +1,151 @@
+//
+// locals
+//
+
+locals {
+  workspace_log_analytics_name = "log-${local.workspace_resource_name_suffix}"
+  workspace_storage_name       = lower(replace("stg${substr(local.workspace_resource_name_suffix, -8, -1)}", "-", ""))
+
+  azuresql_server_diagnostic_setting_name   = "ds-${local.azuresql_server_name}"
+  azuresql_server_diagnostic_setting_name_2 = "ds-${local.azuresql_server_name}-2"
+  azuresql_database_diagnostic_setting_name = "ds-${local.azuresql_server_name}-${var.db_name}"
+}
+
+//
+// data
+//
+
+data "azurerm_storage_account" "sa" {
+  name                = local.workspace_storage_name
+  resource_group_name = local.workspace_resource_group_name
+}
+
+data "azurerm_log_analytics_workspace" "la" {
+  name                = local.workspace_log_analytics_name
+  resource_group_name = local.workspace_resource_group_name
+}
+
+//
+// resources
+//
+
+// outbound sql server firewall rule
+//
+resource "azurerm_mssql_outbound_firewall_rule" "azuresqlfwrule" {
+  name      = data.azurerm_storage_account.sa.primary_blob_host
+  server_id = azurerm_mssql_server.azuresql.id
+}
+
+// RBAC role for storage account
+//
+resource "azurerm_role_assignment" "azuresqlstoragerole" {
+  scope                = data.azurerm_storage_account.sa.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = azurerm_mssql_server.azuresql.identity[0].principal_id
+}
+
+// server level auditing
+//
+resource "azurerm_mssql_server_extended_auditing_policy" "azuresqlaudit" {
+  server_id              = azurerm_mssql_server.azuresql.id
+  storage_endpoint       = data.azurerm_storage_account.sa.primary_blob_endpoint
+  retention_in_days      = 0
+  log_monitoring_enabled = true
+
+  depends_on = [
+    azurerm_role_assignment.azuresqlstoragerole,
+    azurerm_mssql_outbound_firewall_rule.azuresqlfwrule
+  ]
+}
+
+// server level diagnostic setting (for log analytics)
+//
+resource "azurerm_monitor_diagnostic_setting" "azuresqldiagnosticsetting" {
+  name                       = local.azuresql_server_diagnostic_setting_name
+  target_resource_id         = "${azurerm_mssql_server.azuresql.id}/databases/master"
+  log_analytics_workspace_id = data.azurerm_log_analytics_workspace.la.id
+
+  enabled_log {
+    category = "SQLSecurityAuditEvents"
+  }
+
+  lifecycle {
+    ignore_changes = [metric]
+  }
+
+  depends_on = [
+    azurerm_mssql_server.azuresql,
+    azurerm_mssql_database.azuresqldatabase,  // https://github.com/hashicorp/terraform-provider-azurerm/issues/22226#issuecomment-2464486997
+    azurerm_mssql_server_extended_auditing_policy.azuresqlaudit
+  ]
+}
+
+// server level auditing of microsoft support
+//
+resource "azurerm_mssql_server_microsoft_support_auditing_policy" "azuresqlaudit2" {
+  server_id              = azurerm_mssql_server.azuresql.id
+  blob_storage_endpoint  = data.azurerm_storage_account.sa.primary_blob_endpoint
+  log_monitoring_enabled = true
+
+  depends_on = [
+    azurerm_role_assignment.azuresqlstoragerole,
+    azurerm_mssql_outbound_firewall_rule.azuresqlfwrule
+  ]
+}
+
+// server level (microsoft support) diagnostic setting (for log analytics)
+//
+resource "azurerm_monitor_diagnostic_setting" "azuresqldiagnosticsetting2" {
+  name                       = local.azuresql_server_diagnostic_setting_name_2
+  target_resource_id         = "${azurerm_mssql_server.azuresql.id}/databases/master"
+  log_analytics_workspace_id = data.azurerm_log_analytics_workspace.la.id
+
+  enabled_log {
+    category = "DevOpsOperationsAudit"
+  }
+
+  lifecycle {
+    ignore_changes = [metric]
+  }
+
+  depends_on = [
+    azurerm_mssql_server.azuresql,
+    azurerm_mssql_database.azuresqldatabase,  // https://github.com/hashicorp/terraform-provider-azurerm/issues/22226#issuecomment-2464486997
+    azurerm_mssql_server_microsoft_support_auditing_policy.azuresqlaudit2
+  ]
+}
+
+// database level auditing
+//
+resource "azurerm_mssql_database_extended_auditing_policy" "azuresqldbaudit" {
+  database_id            = azurerm_mssql_database.azuresqldatabase.id
+  storage_endpoint       = data.azurerm_storage_account.sa.primary_blob_endpoint
+  retention_in_days      = 0
+  log_monitoring_enabled = true
+
+  depends_on = [
+    azurerm_role_assignment.azuresqlstoragerole,
+    azurerm_mssql_outbound_firewall_rule.azuresqlfwrule
+  ]
+}
+
+// database level diagnostic setting (for log analytics)
+//
+resource "azurerm_monitor_diagnostic_setting" "sql_audit3" {
+  name                       = local.azuresql_database_diagnostic_setting_name
+  target_resource_id         = azurerm_mssql_database.azuresqldatabase.id
+  log_analytics_workspace_id = data.azurerm_log_analytics_workspace.la.id
+
+  enabled_log {
+    category = "SQLSecurityAuditEvents"
+  }
+
+  lifecycle {
+    ignore_changes = [metric]
+  }
+
+  depends_on = [
+    azurerm_mssql_database.azuresqldatabase,
+    azurerm_mssql_database_extended_auditing_policy.azuresqldbaudit
+  ]
+}
