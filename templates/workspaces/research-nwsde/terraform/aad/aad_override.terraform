@@ -1,0 +1,14 @@
+resource "azuread_group" "workspace_owners" {
+  display_name     = "sg-TRE-${var.workspace_resource_name_suffix}-owners"
+  description      = "Azure TRE workspace auto created group"
+}
+
+resource "azuread_group" "workspace_researchers" {
+  display_name     = "sg-TRE-${var.workspace_resource_name_suffix}-researchers"
+  description      = "Azure TRE workspace auto created group"
+}
+
+resource "azuread_group" "workspace_airlock_managers" {
+  display_name     = "sg-TRE-${var.workspace_resource_name_suffix}-airlockmgrs"
+  description      = "Azure TRE workspace auto created group"
+}
