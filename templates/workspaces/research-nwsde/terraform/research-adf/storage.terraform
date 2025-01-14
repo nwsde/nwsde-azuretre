@@ -1,0 +1,13 @@
+############################################################
+# data
+############################################################
+
+data "azurerm_storage_account" "source_storage" {
+  name = local.dataeng_storage_account_name
+  resource_group_name = local.dataeng_resource_group_name
+}
+
+data "azurerm_storage_account" "destination_storage" {
+  name = var.workspace_storage_account_name
+  resource_group_name = var.workspace_resource_group_name
+}
