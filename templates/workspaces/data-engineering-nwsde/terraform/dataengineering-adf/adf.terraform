@@ -1,0 +1,121 @@
+############################################################
+# data
+############################################################
+
+data "azurerm_client_config" "current" {
+}
+
+############################################################
+# resources
+############################################################
+
+// ADF
+//
+resource "azurerm_data_factory" "adf" {
+  name = local.adf_name
+  resource_group_name = var.workspace_resource_group_name
+  location = var.location
+  managed_virtual_network_enabled = true
+  public_network_enabled = false
+
+  tags = {
+    "${local.adf_tag_name_dataeng_output_storage_container_name}" = "${local.dataeng_output_storage_container}"
+  }
+
+  identity {
+    type = "SystemAssigned"
+  }
+}
+
+// ADF integration runtime
+//
+resource "azurerm_data_factory_integration_runtime_azure" "adf_runtime" {
+  name = local.adf_integration_runtime_name
+  data_factory_id = azurerm_data_factory.adf.id
+  location = "AutoResolve"
+  virtual_network_enabled = true
+
+  depends_on = [
+    azurerm_data_factory.adf
+  ]
+}
+
+// ADF managed private endpoint - source storage account
+//
+resource "azurerm_data_factory_managed_private_endpoint" "adf_private_endpoint_source_storage" {
+  name = local.adf_managed_private_endpoint_source_storage_account_name
+  data_factory_id = azurerm_data_factory.adf.id
+  target_resource_id = data.azurerm_storage_account.source_storage_account.id
+  subresource_name = "blob"
+
+  depends_on = [
+    azurerm_data_factory.adf,
+    data.azurerm_storage_account.source_storage_account
+  ]
+}
+
+// ADF linked service - source storage account
+//
+resource "azurerm_data_factory_linked_service_azure_blob_storage" "adf_linked_service_source_storage" {
+  name = local.adf_linked_service_source_storage_account_name
+  data_factory_id = azurerm_data_factory.adf.id
+  integration_runtime_name = local.adf_integration_runtime_name
+  use_managed_identity = true
+  service_endpoint = data.azurerm_storage_account.source_storage_account.primary_blob_endpoint
+  storage_kind = "StorageV2"
+
+  depends_on = [
+    data.azurerm_storage_account.source_storage_account,
+    azurerm_data_factory.adf,
+    azurerm_data_factory_integration_runtime_azure.adf_runtime
+  ]
+}
+
+// Role assignment - source storage account
+//
+resource "azurerm_role_assignment" "role_assignment" {
+  scope = data.azurerm_storage_account.source_storage_account.id
+  role_definition_name = local.azure_role_storage_blob_data_contributor
+  principal_id = one(azurerm_data_factory.adf.identity).principal_id
+
+  depends_on = [
+    azurerm_data_factory.adf,
+    data.azurerm_storage_account.source_storage_account
+  ]
+}
+
+
+############################################################
+# private endpoint connection approval
+############################################################
+
+resource "terraform_data" "private_endpoint_approval" {
+  provisioner "local-exec" {
+    command = <<-EOT
+
+          if ${var.arm_use_msi ? "true" : "false"}; then
+            az login --identity --username '${data.azurerm_client_config.current.client_id}'
+          else
+            echo Local authentication not implemented
+            exit 1
+          fi
+
+          pe_connection_id=$(az network private-endpoint-connection list --id ${data.azurerm_storage_account.source_storage_account.id} --query "[?contains(properties.privateEndpoint.id, '${azurerm_data_factory.adf.name}') && properties.privateLinkServiceConnectionState.status != 'Approved'].id" --output tsv)
+
+          if [ -n "$pe_connection_id" ]; then
+            az network private-endpoint-connection approve --id "$pe_connection_id" --description "Approved via nwsde-data-engineering workspace deployment - Workspace ${var.workspace_short_id}"
+          fi
+
+        EOT
+  }
+
+  triggers_replace = [
+    azurerm_data_factory_managed_private_endpoint.adf_private_endpoint_source_storage.id
+  ]
+
+  depends_on = [
+    azurerm_data_factory.adf,
+    data.azurerm_storage_account.source_storage_account,
+    azurerm_data_factory_managed_private_endpoint.adf_private_endpoint_source_storage
+  ]
+}
