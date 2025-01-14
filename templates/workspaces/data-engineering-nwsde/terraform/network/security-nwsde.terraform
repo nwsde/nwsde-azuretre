@@ -1,0 +1,16 @@
+resource "azurerm_network_security_rule" "allow_outbound_to_windows_activation" {
+  access = "Allow"
+  destination_address_prefixes = [
+    "20.118.99.224",
+    "40.83.235.53"
+  ]
+  destination_port_range       = "1688"
+  direction                    = "Outbound"
+  name                         = "to-windows-activation"
+  network_security_group_name  = azurerm_network_security_group.ws.name
+  priority                     = 141
+  protocol                     = "Tcp"
+  resource_group_name          = var.ws_resource_group_name
+  source_address_prefix        = "*"
+  source_port_range            = "*"
+}
