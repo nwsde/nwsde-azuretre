@@ -240,7 +240,7 @@
             "type": "boolean",
             "title": "Create AAD Groups for each workspace role",
             "description": "Create AAD Groups for the workspace roles. If this is set to true, the workspace will create new AAD Groups.",
-            "default": false,
+            "default": true,
             "updateable": true
           },
           "aad_redirect_uris": {
@@ -287,6 +287,9 @@
       "classNames": "tre-hidden"
     },
     "address_spaces": {
+      "classNames": "tre-hidden"
+    },
+    "create_aad_groups": {
       "classNames": "tre-hidden"
     },
     "ui:order": [
