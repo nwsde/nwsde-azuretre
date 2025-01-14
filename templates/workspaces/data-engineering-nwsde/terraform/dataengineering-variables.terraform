@@ -1,0 +1,4 @@
+variable "arm_use_msi" {
+  type        = string
+  description = "Used as an environment variable to determine if Terraform should use a managed identity"
+}
