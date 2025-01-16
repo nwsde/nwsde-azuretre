@@ -3,9 +3,14 @@ variable "research_project_id" {
   description = "Research project identifier associated with the research data request that this TRE workspace will serve"
 }
 
+variable "connect_to_data_engineering_ws" {
+  type        = bool
+  description = "Create ADF pipeline for approved data ingress from the Data Engineering Workspace"
+}
+
 variable "data_engineering_ws_id" {
   type        = string
-  description = "Specify the short identifier of the data engineering/lakehouse workspace this research workspace will listen on for research data"
+  description = "Specify the short identifier of the Data Engineering Workspace this Research Workspace will receive approved data from"
 }
 
 variable "arm_use_msi" {
