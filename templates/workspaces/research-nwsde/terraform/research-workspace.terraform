@@ -1,4 +1,6 @@
 module "research-adf" {
+  count = var.connect_to_data_engineering_ws ? 1 : 0
+
   source = "./research-adf"
 
   location = var.location

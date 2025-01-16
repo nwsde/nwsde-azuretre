@@ -128,8 +128,12 @@ parameters:
     description: "The redundancy option for the storage account in the workspace: GRS (Geo-Redundant Storage) or ZRS (Zone-Redundant Storage)."
   - name: research_project_id
     type: string
+  - name: connect_to_data_engineering_ws
+    type: boolean
+    default: false
   - name: data_engineering_ws_id
     type: string
+    default: ""
 
 outputs:
   - name: app_role_id_workspace_owner
@@ -201,6 +205,7 @@ install:
         key_store_id: ${ bundle.parameters.key_store_id }
         storage_account_redundancy: ${ bundle.parameters.storage_account_redundancy }
         research_project_id: ${ bundle.parameters.research_project_id }
+        connect_to_data_engineering_ws: ${ bundle.parameters.connect_to_data_engineering_ws }
         data_engineering_ws_id: ${ bundle.parameters.data_engineering_ws_id }
         arm_use_msi: ${ bundle.parameters.arm_use_msi }
       backendConfig:
@@ -249,6 +254,7 @@ upgrade:
         key_store_id: ${ bundle.parameters.key_store_id }
         storage_account_redundancy: ${ bundle.parameters.storage_account_redundancy }
         research_project_id: ${ bundle.parameters.research_project_id }
+        connect_to_data_engineering_ws: ${ bundle.parameters.connect_to_data_engineering_ws }
         data_engineering_ws_id: ${ bundle.parameters.data_engineering_ws_id }
         arm_use_msi: ${ bundle.parameters.arm_use_msi }
       backendConfig:
@@ -320,6 +326,7 @@ uninstall:
         key_store_id: ${ bundle.parameters.key_store_id }
         storage_account_redundancy: ${ bundle.parameters.storage_account_redundancy }
         research_project_id: ${ bundle.parameters.research_project_id }
+        connect_to_data_engineering_ws: ${ bundle.parameters.connect_to_data_engineering_ws }
         data_engineering_ws_id: ${ bundle.parameters.data_engineering_ws_id }
         arm_use_msi: ${ bundle.parameters.arm_use_msi }
       backendConfig:
