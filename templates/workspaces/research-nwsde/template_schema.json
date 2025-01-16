@@ -8,7 +8,7 @@
     "auth_type",
     "address_space_size",
     "research_project_id",
-    "data_engineering_ws_id"
+    "connect_to_data_engineering_ws"
   ],
   "authorizedRoles": [],
   "properties": {
@@ -17,10 +17,12 @@
       "title": "Research Project ID",
       "description": "The research project id is the identifier associated with a research data request which this TRE workspace will serve"
     },
-    "data_engineering_ws_id": {
-      "type": "string",
-      "title": "Data Engineering Workspace Short ID",
-      "description": "Specify the short identifier of the data engineering workspace this research workspace will listen on for research data"
+    "connect_to_data_engineering_ws": {
+      "type": "boolean",
+      "title": "Create data pipeline from Data Engineering Workspace",
+      "description": "Create ADF pipeline for approved data ingress from the Data Engineering Workspace",
+      "default": false,
+      "updateable": true
     },
     "shared_storage_quota": {
       "type": "integer",
@@ -87,6 +89,31 @@
     }
   },
   "allOf": [
+    {
+      "if": {
+        "properties": {
+          "connect_to_data_engineering_ws": {
+            "const": true
+          }
+        },
+        "required": [
+          "connect_to_data_engineering_ws"
+        ]
+      },
+      "then": {
+        "properties": {
+          "data_engineering_ws_id": {
+            "type": "string",
+            "title": "Data Engineering Workspace Short ID",
+            "description": "Specify the short identifier of the Data Engineering Workspace this Research Workspace will receive approved data from",
+            "updateable": true
+          }
+        },
+        "required": [
+          "data_engineering_ws_id"
+        ]
+      }
+    },
     {
       "if": {
         "properties": {
@@ -301,7 +328,16 @@
     "address_spaces": {
       "classNames": "tre-hidden"
     },
+    "auth_type": {
+      "classNames": "tre-hidden"
+    },
+    "address_space_size": {
+      "classNames": "tre-hidden"
+    },
     "create_aad_groups": {
+      "classNames": "tre-hidden"
+    },
+    "storage_account_redundancy": {
       "classNames": "tre-hidden"
     },
     "ui:order": [
@@ -309,6 +345,7 @@
       "description",
       "overview",
       "research_project_id",
+      "connect_to_data_engineering_ws",
       "data_engineering_ws_id",
       "shared_storage_quota",
       "storage_account_redundancy",
