@@ -288,7 +288,16 @@
     "address_spaces": {
       "classNames": "tre-hidden"
     },
+    "auth_type": {
+      "classNames": "tre-hidden"
+    },
+    "address_space_size": {
+      "classNames": "tre-hidden"
+    },
     "create_aad_groups": {
+      "classNames": "tre-hidden"
+    },
+    "storage_account_redundancy": {
       "classNames": "tre-hidden"
     },
     "ui:order": [
