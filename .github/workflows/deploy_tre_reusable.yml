@@ -95,6 +95,11 @@ on:  # yamllint disable-line rule:truthy
       AZURE_CREDENTIALS:
         description: ""
         required: true
+# JR Add deployment runner IP ranges
+      DEPLOYMENT_RUNNER_IPS:
+        description: ""
+        required: true
+# End
 
 # This will prevent multiple runs of this entire workflow.
 # We should NOT cancel in progress runs as that can destabilize the environment.
@@ -103,7 +108,7 @@ concurrency: "deploy-${{ inputs.ciGitRef }}"
 jobs:
   deploy_management:
     name: Deploy Management
-    runs-on: ubuntu-latest
+    runs-on: nwsde-ubuntu-latest
     permissions:
       checks: write
       contents: read
@@ -177,6 +182,10 @@ jobs:
 
           if [ "${{ vars.LOCATION }}" == '' ]; then
             echo "Missing variable: LOCATION" && exit 1
+          fi
+
+          if [ "${{ secrets.DEPLOYMENT_RUNNER_IPS }}" == '' ]; then
+            echo "Missing secret: DEPLOYMENT_RUNNER_IPS" && exit 1
           fi
 
       - name: Report check status start
@@ -269,7 +278,7 @@ jobs:
   build_core_images:
     # used to build images used by core infrastructure
     name: Build Core Docker Images
-    runs-on: ubuntu-latest
+    runs-on: nwsde-ubuntu-latest
     needs: [deploy_management]
     environment: ${{ inputs.environmentName }}
     strategy:
@@ -298,7 +307,7 @@ jobs:
 
   start_tre:
     name: Start TRE
-    runs-on: ubuntu-latest
+    runs-on: nwsde-ubuntu-latest
     needs: [deploy_management]
     environment: ${{ inputs.environmentName }}
     steps:
@@ -322,7 +331,7 @@ jobs:
 
   deploy_tre:
     name: Deploy TRE
-    runs-on: ubuntu-latest
+    runs-on: nwsde-ubuntu-latest
     needs: [build_core_images, start_tre]
     environment: ${{ inputs.environmentName }}
     steps:
@@ -364,6 +373,7 @@ jobs:
           RP_BUNDLE_VALUES: ${{ vars.RP_BUNDLE_VALUES }}
           FIREWALL_SKU: ${{ vars.FIREWALL_SKU}}
           APP_GATEWAY_SKU: ${{ vars.APP_GATEWAY_SKU }}
+          DEPLOYMENT_RUNNER_IPS: ${{ secrets.DEPLOYMENT_RUNNER_IPS }}
 
       - name: API Healthcheck
         uses: ./.github/actions/devcontainer_run_command
@@ -378,7 +388,7 @@ jobs:
 
   publish_bundles:
     name: Publish Bundles
-    runs-on: ubuntu-latest
+    runs-on: nwsde-ubuntu-latest
     needs: [deploy_management]
     strategy:
       matrix:
@@ -440,7 +450,7 @@ jobs:
 
   publish_shared_bundles:
     name: Publish Shared Bundles
-    runs-on: ubuntu-latest
+    runs-on: nwsde-ubuntu-latest
     needs: [deploy_management]
     strategy:
       matrix:
@@ -486,7 +496,7 @@ jobs:
 
   register_shared_bundles:
     name: Register Shared Bundles
-    runs-on: ubuntu-latest
+    runs-on: nwsde-ubuntu-latest
     needs: [publish_shared_bundles, deploy_tre]
     strategy:
       matrix:
@@ -538,7 +548,7 @@ jobs:
 
   register_bundles:
     name: Register Bundles
-    runs-on: ubuntu-latest
+    runs-on: nwsde-ubuntu-latest
     needs: [publish_bundles, deploy_tre]
     strategy:
       matrix:
@@ -598,7 +608,7 @@ jobs:
 
   register_user_resource_bundles:
     name: Register User Resource Bundles
-    runs-on: ubuntu-latest
+    runs-on: nwsde-ubuntu-latest
     # user resource bundles need to wait for their parent resource to be registered.
     needs: [register_bundles, publish_bundles, deploy_tre]
     strategy:
@@ -648,7 +658,7 @@ jobs:
 
   deploy_shared_services:
     name: Deploy shared services
-    runs-on: ubuntu-latest
+    runs-on: nwsde-ubuntu-latest
     needs: [register_shared_bundles, deploy_tre]
     environment: ${{ inputs.environmentName }}
     steps:
@@ -698,7 +708,7 @@ jobs:
 
   deploy_ui:
     name: Deploy UI
-    runs-on: ubuntu-latest
+    runs-on: nwsde-ubuntu-latest
     needs: [deploy_tre]
     environment: ${{ inputs.environmentName }}
     steps:
@@ -729,7 +739,7 @@ jobs:
   e2e_tests_smoke:
     name: "Run E2E Tests (Smoke)"
     if: ${{ inputs.ENABLE_E2E_TESTS }}
-    runs-on: ubuntu-latest
+    runs-on: nwsde-ubuntu-latest
     environment: ${{ inputs.environmentName }}
     needs: [deploy_shared_services, register_bundles, deploy_ui]
     timeout-minutes: 10
@@ -772,7 +782,7 @@ jobs:
   e2e_tests_custom:
     name: "Run E2E Tests"
     if: ${{ inputs.ENABLE_E2E_TESTS && (inputs.e2eTestsCustomSelector != '') }}
-    runs-on: ubuntu-latest
+    runs-on: nwsde-ubuntu-latest
     environment: ${{ inputs.environmentName }}
     needs: [deploy_shared_services, register_bundles, register_user_resource_bundles]
     timeout-minutes: 300
@@ -816,7 +826,7 @@ jobs:
   summary:
     name: Summary
     needs: [e2e_tests_smoke, e2e_tests_custom]
-    runs-on: ubuntu-latest
+    runs-on: nwsde-ubuntu-latest
     permissions:
       checks: write
       contents: read
