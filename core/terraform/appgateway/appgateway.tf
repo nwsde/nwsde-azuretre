@@ -283,8 +283,44 @@ resource "azurerm_web_application_firewall_policy" "waf" {
   }
 
   custom_rules {
-    name      = "UKONLY"
+    name      = "DEPLOYMENTRUNNER"
     priority  = 1
+    rule_type = "MatchRule"
+
+    match_conditions {
+      match_variables {
+        variable_name = "RemoteAddr"
+      }
+
+      operator           = "IPMatch"
+      negation_condition = false
+      match_values       = split(",", var.deployment_runner_ips)
+    }
+
+    action = "Allow"
+  }
+
+  custom_rules {
+    name      = "CERTBOT"
+    priority  = 2
+    rule_type = "MatchRule"
+
+    match_conditions {
+      match_variables {
+        variable_name = "RequestUri"
+      }
+
+      operator           = "BeginsWith"
+      negation_condition = false
+      match_values       = [ "/.well-known/acme-challenge/" ]
+    }
+
+    action = "Allow"
+  }
+
+  custom_rules {
+    name      = "UKONLY"
+    priority  = 5
     rule_type = "MatchRule"
 
     match_conditions {
