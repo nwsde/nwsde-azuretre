@@ -95,3 +95,7 @@ developer_settings:
 # If you want to use TRE_URL to point to your local TRE API instance or be configured to another cloud provider
 # uncomment and set this variable
 #  tre_url: __CHANGE_ME__
+
+# Pass in GitHub Actions runner ranges in order to add an exception to the WAF
+#  github_runner_ip_range1: __CHANGE_ME___
+#  github_runner_ip_range2: __CHANGE_ME___
