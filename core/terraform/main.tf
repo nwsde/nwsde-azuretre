@@ -109,6 +109,8 @@ module "appgateway" {
   encryption_key_versionless_id = var.enable_cmk_encryption ? azurerm_key_vault_key.tre_encryption[0].versionless_id : null
   encryption_identity_id        = var.enable_cmk_encryption ? azurerm_user_assigned_identity.encryption[0].id : null
 
+  deployment_runner_ips = var.deployment_runner_ips
+
   depends_on = [
     module.network,
     azurerm_key_vault.kv,
