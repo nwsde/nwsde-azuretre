@@ -38,3 +38,6 @@ variable "enable_cmk_encryption" {
 variable "encryption_key_versionless_id" {
   type = string
 }
+variable "deployment_runner_ips" {
+  type  = string
+}
