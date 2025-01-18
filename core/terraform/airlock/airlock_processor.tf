@@ -157,3 +157,23 @@ resource "azurerm_private_endpoint" "function_storage" {
     subresource_names              = [each.key]
   }
 }
+
+######################################################################
+# NWSDE temporary - required to set azurerm_linux_function_app to
+#                   TLS 1.3.  Current azurerm provider does not
+#                   support TLS 1.3
+######################################################################
+resource "azapi_update_resource" "airlock_function_app_update_tls" {
+  type      = "Microsoft.Web/sites/config@2022-03-01"
+  name      = "web"
+  parent_id = azurerm_linux_function_app.airlock_function_app.id
+  body = jsonencode({
+    properties = {
+      minTlsVersion = "1.3"
+    }
+  })
+  depends_on = [
+    azurerm_linux_function_app.airlock_function_app
+  ]
+}
+# End NWSDE temporary
