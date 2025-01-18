@@ -15,6 +15,10 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
 # hadolint ignore=DL3022
 COPY --from=guacamole --link . ${BUNDLE_DIR}/
 
+# Copy and change the file extension of .terraform file to .tf
+COPY ./terraform/main-nwsde.terraform "${BUNDLE_DIR}"/terraform/main-nwsde.tf
+COPY ./terraform/guacamole-nwsde/web_app-nwsde.terraform "${BUNDLE_DIR}"/terraform/guacamole-nwsde/web_app-nwsde.tf
+
 # PORTER_MIXINS
 
 # Use the BUNDLE_DIR build argument to copy files into the bundle
