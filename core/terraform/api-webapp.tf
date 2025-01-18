@@ -157,3 +157,23 @@ resource "azurerm_monitor_diagnostic_setting" "webapp_api" {
 
   lifecycle { ignore_changes = [log_analytics_destination_type] }
 }
+
+######################################################################
+# NWSDE temporary - required to set azurerm_linux_web_app to
+#                   TLS 1.3.  Current azurerm provider does not
+#                   support TLS 1.3
+######################################################################
+resource "azapi_update_resource" "api_update_tls" {
+  type      = "Microsoft.Web/sites/config@2022-03-01"
+  name      = "web"
+  parent_id = azurerm_linux_web_app.api.id
+  body = jsonencode({
+    properties = {
+      minTlsVersion = "1.3"
+    }
+  })
+  depends_on = [
+    azurerm_linux_web_app.api
+  ]
+}
+# End NWSDE temporary
