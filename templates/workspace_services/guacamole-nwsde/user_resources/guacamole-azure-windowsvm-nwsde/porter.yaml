@@ -17,6 +17,8 @@ custom:
     "North West SDE Windows 11 Data Science":
       source_image_name: imgdef-nwsde-windows-11
       conda_config: true
+      secure_boot_enabled: true
+      vtpm_enabled: true
 
 credentials:
   - name: azure_tenant_id
