@@ -23,9 +23,29 @@ env:
   TF_IN_AUTOMATION: 1  # Run in headless mode
 
 jobs:
+  enable-waf-exceptions:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'CICD' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          environment: ${{ (vars.AZURE_ENVIRONMENT != '' && vars.AZURE_ENVIRONMENT) || 'AzureCloud' }}
+
+      - name: Enabling WAF deployment exceptions
+        run: .github/scripts-nwsde/apply-waf-deployment-exceptions.sh "ENABLE" ${{ secrets.TRE_ID }}
+
   renew_letsencrypt_certs:
+    needs: enable-waf-exceptions
+
     name: Renew Lets Encrypt Certificates
     runs-on: ubuntu-latest
+
     environment: ${{ github.event.inputs.environment || 'CICD' }}
     steps:
       - name: Checkout
@@ -58,3 +78,23 @@ jobs:
             && /opt/certbot/bin/pip install --upgrade pip \
             && /opt/certbot/bin/pip install certbot
           make letsencrypt
+
+  disable-waf-exceptions:
+    if: always()
+    needs: renew_letsencrypt_certs
+
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'CICD' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          environment: ${{ (vars.AZURE_ENVIRONMENT != '' && vars.AZURE_ENVIRONMENT) || 'AzureCloud' }}
+
+      - name: Disabling WAF deployment exceptions
+        run: .github/scripts-nwsde/apply-waf-deployment-exceptions.sh "DISABLE" ${{ secrets.TRE_ID }}
