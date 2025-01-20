@@ -23,8 +23,27 @@ on:  # yamllint disable-line rule:truthy
 concurrency: "${{ github.workflow }}-${{ github.ref }}"
 
 jobs:
+  enable-waf-exceptions:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'CICD' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          environment: ${{ (vars.AZURE_ENVIRONMENT != '' && vars.AZURE_ENVIRONMENT) || 'AzureCloud' }}
+
+      - name: Enabling WAF deployment exceptions
+        run: .github/scripts-nwsde/apply-waf-deployment-exceptions.sh "ENABLE" ${{ secrets.TRE_ID }}
+
   run-deploy-tre-main:
     name: "Deploy"
+    needs: enable-waf-exceptions
+
 # JR 29-11-2023  Disable main branch check - this is now controlled via GitHub environment protection rules (see Settings > Environments)
 #    if: github.ref == 'refs/heads/main'
     uses: ./.github/workflows/deploy_tre_reusable.yml
@@ -61,3 +80,23 @@ jobs:
       TRE_ID: ${{ secrets.TRE_ID }}
       CI_CACHE_ACR_NAME: ${{ secrets.ACR_NAME }}
       DEPLOYMENT_RUNNER_IPS: ${{ secrets.DEPLOYMENT_RUNNER_IPS }}
+
+  disable-waf-exceptions:
+    needs: run-deploy-tre-main
+    if: always()
+
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'CICD' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          environment: ${{ (vars.AZURE_ENVIRONMENT != '' && vars.AZURE_ENVIRONMENT) || 'AzureCloud' }}
+
+      - name: Disabling WAF deployment exceptions
+        run: .github/scripts-nwsde/apply-waf-deployment-exceptions.sh "DISABLE" ${{ secrets.TRE_ID }}
