@@ -1,0 +1,15 @@
+# syntax=docker/dockerfile-upstream:1.4.0
+FROM --platform=linux/amd64 debian:bookworm-slim
+
+# PORTER_INIT
+
+# copy files from the base workspace (dir passed to porter via --build-context)
+# ignoring hadolint DL3022; for details see https://github.com/hadolint/hadolint/issues/830
+#
+# hadolint ignore=DL3022
+COPY --from=sonatype-nexus-vm --link . ${BUNDLE_DIR}/
+
+# PORTER_MIXINS
+
+# Use the BUNDLE_DIR build argument to copy files into the bundle
+COPY --link . ${BUNDLE_DIR}/
