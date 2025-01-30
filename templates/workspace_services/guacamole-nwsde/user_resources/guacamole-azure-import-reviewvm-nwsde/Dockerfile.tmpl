@@ -11,6 +11,10 @@ WORKDIR $BUNDLE_DIR
 # hadolint ignore=DL3022
 COPY --from=guacamole-azure-import-reviewvm --link . ${BUNDLE_DIR}/
 
+# Copy and change the file extension of .terraform file to .tf
+COPY ./terraform/main-nwsde.terraform "${BUNDLE_DIR}"/terraform/main-nwsde.tf
+COPY ./terraform/windowsvm-nwsde/vmextensions.terraform "${BUNDLE_DIR}"/terraform/windowsvm-nwsde/vmextensions.tf
+
 # PORTER_MIXINS
 
 # Use the BUNDLE_DIR build argument to copy files into the bundle

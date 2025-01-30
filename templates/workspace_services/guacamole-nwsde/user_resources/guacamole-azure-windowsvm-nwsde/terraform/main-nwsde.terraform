@@ -1,0 +1,7 @@
+module "windowsvm-nwsde" {
+
+  source = "./windowsvm-nwsde"
+
+  windows_virtual_machine = azurerm_windows_virtual_machine.windowsvm
+
+}
