@@ -74,6 +74,30 @@
         "resourceAction": "upgrade",
         "properties": [
           {
+            "name": "network_rule_collections",
+            "type": "array",
+            "arraySubstitutionAction": "replace",
+            "arrayMatchField": "name",
+            "value": {
+              "name": "nrc_nexus",
+              "action": "Allow",
+              "rules": [
+                {
+                  "name": "guest-attestation",
+                  "description": "Guest Attestation",
+                  "source_addresses": "{{ resource.properties.private_ip_addresses }}",
+                  "destination_addresses": [ "AzureAttestation"],
+                  "destination_ports": [
+                    "443"
+                  ],
+                  "protocols": [
+                    "TCP"
+                  ]
+                }
+              ]
+            }
+          },
+          {
             "name": "rule_collections",
             "type": "array",
             "arraySubstitutionAction": "replace",
@@ -132,6 +156,30 @@
         "resourceType": "shared-service",
         "resourceAction": "upgrade",
         "properties": [
+          {
+            "name": "network_rule_collections",
+            "type": "array",
+            "arraySubstitutionAction": "replace",
+            "arrayMatchField": "name",
+            "value": {
+              "name": "nrc_nexus",
+              "action": "Allow",
+              "rules": [
+                {
+                  "name": "guest-attestation",
+                  "description": "Guest Attestation",
+                  "source_addresses": "{{ resource.properties.private_ip_addresses }}",
+                  "destination_addresses": [ "AzureAttestation"],
+                  "destination_ports": [
+                    "443"
+                  ],
+                  "protocols": [
+                    "TCP"
+                  ]
+                }
+              ]
+            }
+          },
           {
             "name": "rule_collections",
             "type": "array",
