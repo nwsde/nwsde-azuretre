@@ -1,0 +1,21 @@
+resource "random_password" "nexus_vm_password" {
+  count = 0
+}
+
+resource "azurerm_key_vault_secret" "nexus_vm_password" {
+  count = 0
+
+  value = ""
+}
+
+resource "azurerm_linux_virtual_machine" "nexus" {
+  disable_password_authentication = true
+
+  admin_password = null
+  connection = null
+
+  admin_ssh_key {
+    username = "adminuser"
+    public_key = data.azurerm_key_vault_secret.nexus_public_key.value
+  }
+}
