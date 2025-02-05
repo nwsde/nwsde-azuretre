@@ -1,0 +1,4 @@
+data "azurerm_key_vault_secret" "nexus_public_key" {
+  name         = "nexus-vm-ssh-public-key"  # ensure this name aligns in generate-ssh-keypair.sh
+  key_vault_id = data.azurerm_key_vault.kv.id
+}

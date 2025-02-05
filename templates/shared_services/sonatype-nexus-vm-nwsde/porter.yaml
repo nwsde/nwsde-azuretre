@@ -43,6 +43,10 @@ parameters:
     env: ARM_ENVIRONMENT
     type: string
     default: "public"
+  - name: azure_environment
+    type: string
+    default: "AzureCloud"
+    description: "Used by Azure CLI to set the Azure environment"
   - name: ssl_cert_name
     type: string
     default: "nexus-ssl"
@@ -87,8 +91,31 @@ mixins:
   - exec
   - terraform:
       clientVersion: 1.9.8
+  - az:
+      clientVersion: 2.67.0
 
 install:
+  - az:
+      description: "Set Azure Cloud Environment"
+      arguments:
+        - cloud
+        - set
+      flags:
+        name: ${ bundle.parameters.azure_environment }
+  - az:
+      description: "Login to Azure"
+      arguments:
+        - login
+      flags:
+        identity:
+        username: ${ bundle.credentials.azure_client_id }
+  - exec:
+      description: "Generate SSH keypair"
+      command: bash
+      arguments:
+        - ./scripts-nwsde/generate-ssh-keypair.sh
+      flags:
+        tre_id: ${ bundle.parameters.tre_id }
   - terraform:
       description: "Deploy shared service"
       vars:
@@ -113,6 +140,27 @@ install:
         - name: is_exposed_externally
 
 upgrade:
+  - az:
+      description: "Set Azure Cloud Environment"
+      arguments:
+        - cloud
+        - set
+      flags:
+        name: ${ bundle.parameters.azure_environment }
+  - az:
+      description: "Login to Azure"
+      arguments:
+        - login
+      flags:
+        identity:
+        username: ${ bundle.credentials.azure_client_id }
+  - exec:
+      description: "Generate SSH keypair"
+      command: bash
+      arguments:
+        - ./scripts-nwsde/generate-ssh-keypair.sh
+      flags:
+        tre_id: ${ bundle.parameters.tre_id }
   - terraform:
       description: "Upgrade shared service"
       vars:
@@ -153,3 +201,24 @@ uninstall:
         storage_account_name: ${ bundle.parameters.tfstate_storage_account_name }
         container_name: ${ bundle.parameters.tfstate_container_name }
         key: ${ bundle.parameters.tre_id }-shared-service-sonatype-nexus-vm
+  - az:
+      description: "Set Azure Cloud Environment"
+      arguments:
+        - cloud
+        - set
+      flags:
+        name: ${ bundle.parameters.azure_environment }
+  - az:
+      description: "Login to Azure"
+      arguments:
+        - login
+      flags:
+        identity:
+        username: ${ bundle.credentials.azure_client_id }
+  - exec:
+      description: "Generate SSH keypair"
+      command: bash
+      arguments:
+        - ./scripts-nwsde/remove-ssh-keypair.sh
+      flags:
+        tre_id: ${ bundle.parameters.tre_id }
