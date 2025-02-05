@@ -3,6 +3,11 @@ FROM --platform=linux/amd64 debian:bookworm-slim
 
 # PORTER_INIT
 
+# install ssh-keygen
+RUN apt-get update && \
+    apt-get install -y openssh-client && \
+    rm -rf /var/lib/apt/lists/*
+
 # copy files from the base workspace (dir passed to porter via --build-context)
 # ignoring hadolint DL3022; for details see https://github.com/hadolint/hadolint/issues/830
 #
@@ -11,6 +16,8 @@ COPY --from=sonatype-nexus-vm --link . ${BUNDLE_DIR}/
 
 # Copy and change the file extension of .terraform file to .tf
 COPY ./terraform/main_override.terraform "${BUNDLE_DIR}"/terraform/main_override.tf
+COPY ./terraform/vm_override.terraform "${BUNDLE_DIR}"/terraform/vm_override.tf
+COPY ./terraform/keyvault-nwsde.terraform "${BUNDLE_DIR}"/terraform/keyvault-nwsde.tf
 COPY ./terraform/vmextensions-nwsde.terraform "${BUNDLE_DIR}"/terraform/vmextensions-nwsde.tf
 
 # PORTER_MIXINS
